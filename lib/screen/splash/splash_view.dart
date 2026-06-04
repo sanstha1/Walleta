@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -69,41 +68,15 @@ class _SplashScreenState extends State<SplashScreen>
                 opacity: _fadeAnimation,
                 child: Image.asset(
                   'assets/images/splash_logo.png',
-                  width: 160,
-                  height: 160,
+                  width: 460,
+                  height: 460,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             SlideTransition(
               position: _slideAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Wallet',
-                        style: GoogleFonts.poppins(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A5EA8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'a',
-                        style: GoogleFonts.poppins(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF38B6E8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: FadeTransition(opacity: _fadeAnimation),
             ),
           ],
         ),
