@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/onboarding/view/onboarding_view.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,7 +46,15 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         );
 
-    _controller.forward();
+    _controller.forward().then((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const OnboardingView()),
+          );
+        }
+      });
+    });
   }
 
   @override
