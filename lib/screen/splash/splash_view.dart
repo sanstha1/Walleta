@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:walleta/onboarding/view/onboarding_view.dart';
+import 'package:walleta/screen/onboarding/view/onboarding_view.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -1,42 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:walleta/authentication/signup_page.dart';
+import 'package:walleta/common/services/auth_method.dart';
+import 'package:walleta/common/utils/my_snackbar.dart';
+import 'package:walleta/screen/authentication/view/otp_verification_page.dart';
+import 'package:walleta/screen/bottom_navigation_screen.dart';
+import 'package:walleta/services/auth_service.dart';
 import 'package:walleta/widgets/gradient_button.dart';
 
-class LoginPage extends StatefulWidget {
-  final bool isFromPremium;
-  const LoginPage({super.key, this.isFromPremium = false});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
   bool _obscurePassword = true;
-  bool _biometricAvailable = false;
+  bool _obscureConfirm = true;
 
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final confirmController = TextEditingController();
 
   @override
   void dispose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmController.dispose();
     super.dispose();
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) return "Name is required";
+    if (value.trim().length < 2) return "Name must be at least 2 characters";
+    return null;
   }
 
   String? _validateEmail(String? value) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (value == null || value.trim().isEmpty) return "Email is required";
-    if (!emailRegex.hasMatch(value.trim()))
+    if (!emailRegex.hasMatch(value.trim())) {
       return "Enter a valid email address";
+    }
     return null;
   }
 
@@ -44,6 +53,71 @@ class _LoginPageState extends State<LoginPage> {
     if (value == null || value.isEmpty) return "Password is required";
     if (value.length < 6) return "Min. 6 characters required";
     return null;
+  }
+
+  String _parseErrorMessage(Map<String, dynamic> res) {
+    final data = res["data"] as Map<String, dynamic>? ?? {};
+    final message = (data["message"] ?? "").toString().toLowerCase();
+    if (message.contains("already") ||
+        message.contains("duplicate") ||
+        message.contains("exist")) {
+      return "An account with this email already exists";
+    }
+    return data["message"] ?? "Signup failed";
+  }
+
+  Future<void> _handleSignup() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (passwordController.text != confirmController.text) {
+      _error("Passwords do not match");
+      return;
+    }
+
+    setState(() => loading = true);
+    try {
+      final res = await AuthService().signup(
+        nameController.text.trim(),
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
+
+      if (res["status"] == 201) {
+        if (!mounted) return;
+        SnackbarUtils.showSuccess(context, "OTP sent to your email!");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                OtpVerificationPage(email: emailController.text.trim()),
+          ),
+        );
+      } else {
+        _error(_parseErrorMessage(res));
+      }
+    } catch (e) {
+      _error("Connection error. Please try again.");
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  void _error(String msg) {
+    if (!mounted) return;
+    SnackbarUtils.showError(context, msg);
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final userCredential = await GoogleSignInService.signInWithGoogle();
+      if (!mounted || userCredential == null) return;
+      SnackbarUtils.showSuccess(context, "Welcome!");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+      );
+    } catch (e) {
+      if (mounted) SnackbarUtils.showError(context, "Google login failed");
+    }
   }
 
   @override
@@ -79,15 +153,22 @@ class _LoginPageState extends State<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'LOGIN',
+                            'Create an account',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF6B7280),
-                              letterSpacing: 1.5,
+                              color: const Color(0xFF111827),
                             ),
                           ),
                           const SizedBox(height: 20),
+                          _buildLabel('Full Name'),
+                          const SizedBox(height: 6),
+                          _buildTextField(
+                            controller: nameController,
+                            hint: 'Enter your full name',
+                            validator: _validateName,
+                          ),
+                          const SizedBox(height: 14),
                           _buildLabel('Email'),
                           const SizedBox(height: 6),
                           _buildTextField(
@@ -95,12 +176,12 @@ class _LoginPageState extends State<LoginPage> {
                             hint: 'Enter your email',
                             validator: _validateEmail,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 14),
                           _buildLabel('Password'),
                           const SizedBox(height: 6),
                           _buildTextField(
                             controller: passwordController,
-                            hint: 'Enter your password',
+                            hint: 'Create a password',
                             obscure: _obscurePassword,
                             validator: _validatePassword,
                             suffix: IconButton(
@@ -116,68 +197,38 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordPage(),
-                                ),
+                          const SizedBox(height: 14),
+                          _buildLabel('Confirm Password'),
+                          const SizedBox(height: 6),
+                          _buildTextField(
+                            controller: confirmController,
+                            hint: 'Confirm your password',
+                            obscure: _obscureConfirm,
+                            validator: (val) => (val == null || val.isEmpty)
+                                ? "Please confirm password"
+                                : null,
+                            suffix: IconButton(
+                              icon: Icon(
+                                _obscureConfirm
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: const Color(0xFF9CA3AF),
+                                size: 20,
                               ),
-                              child: Text(
-                                'Forgot password?',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: const Color(0xFF4A8F7A),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              onPressed: () => setState(
+                                () => _obscureConfirm = !_obscureConfirm,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                           GradientButton(
-                            onPressed: _handleLogin,
-                            text: 'LOGIN',
+                            onPressed: _handleSignup,
+                            text: 'Register',
                             isLoading: loading,
                             height: 50,
                             borderRadius: 12,
                             fontSize: 15,
                           ),
-                          if (_biometricAvailable) ...[
-                            const SizedBox(height: 12),
-                            GestureDetector(
-                              child: Container(
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFF4A8F7A),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.fingerprint,
-                                      color: Color(0xFF4A8F7A),
-                                      size: 22,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Login with Biometrics',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: const Color(0xFF4A8F7A),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 24),
                           Row(
                             children: [
@@ -187,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                                   horizontal: 12,
                                 ),
                                 child: Text(
-                                  'or sign in with',
+                                  'or sign up with',
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: const Color(0xFF9CA3AF),
@@ -200,6 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 20),
                           Center(
                             child: GestureDetector(
+                              onTap: _signInWithGoogle,
                               child: Container(
                                 width: 52,
                                 height: 52,
@@ -221,22 +273,17 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 24),
                           Center(
                             child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SignupPage(),
-                                ),
-                              ),
+                              onTap: () => Navigator.pop(context),
                               child: RichText(
                                 text: TextSpan(
-                                  text: "Don't have an account? ",
+                                  text: 'Already have an account? ',
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     color: const Color(0xFF6B7280),
                                   ),
                                   children: [
                                     TextSpan(
-                                      text: 'Create an account',
+                                      text: 'Login',
                                       style: GoogleFonts.poppins(
                                         fontSize: 13,
                                         color: const Color(0xFF4A8F7A),
@@ -279,8 +326,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Welcome back!',
-            // ignore: deprecated_member_use
+            'Get Started!',
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.white.withOpacity(0.85),
