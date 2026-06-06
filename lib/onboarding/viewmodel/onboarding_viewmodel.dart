@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/onboarding/view/get_started.dart';
 
 class OnboardingViewModel extends ChangeNotifier {
   final PageController pageController = PageController();
@@ -48,10 +49,10 @@ class OnboardingViewModel extends ChangeNotifier {
   }
 
   void getStarted(BuildContext context) {
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (_) => const HomeScreen()),
-    // );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const GetStartedView()),
+    );
   }
 
   @override
