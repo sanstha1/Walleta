@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:walleta/screen/authentication/login_page.dart';
+import 'package:walleta/services/auth_service.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;
