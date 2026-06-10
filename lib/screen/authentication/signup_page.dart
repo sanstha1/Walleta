@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:walleta/common/services/auth_method.dart';
 import 'package:walleta/common/utils/my_snackbar.dart';
-import 'package:walleta/screen/authentication/view/otp_verification_page.dart';
-import 'package:walleta/screen/bottom_navigation_screen.dart';
+import 'package:walleta/screen/authentication/otp_verification_page.dart';
 import 'package:walleta/services/auth_service.dart';
 import 'package:walleta/widgets/gradient_button.dart';
 
@@ -104,20 +102,6 @@ class _SignupPageState extends State<SignupPage> {
   void _error(String msg) {
     if (!mounted) return;
     SnackbarUtils.showError(context, msg);
-  }
-
-  Future<void> _signInWithGoogle() async {
-    try {
-      final userCredential = await GoogleSignInService.signInWithGoogle();
-      if (!mounted || userCredential == null) return;
-      SnackbarUtils.showSuccess(context, "Welcome!");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
-      );
-    } catch (e) {
-      if (mounted) SnackbarUtils.showError(context, "Google login failed");
-    }
   }
 
   @override
@@ -228,47 +212,6 @@ class _SignupPageState extends State<SignupPage> {
                             height: 50,
                             borderRadius: 12,
                             fontSize: 15,
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              const Expanded(child: Divider()),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  'or sign up with',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: const Color(0xFF9CA3AF),
-                                  ),
-                                ),
-                              ),
-                              const Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Center(
-                            child: GestureDetector(
-                              onTap: _signInWithGoogle,
-                              child: Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: const Color(0xFFF3F4F6),
-                                  border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.g_mobiledata,
-                                  size: 32,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                            ),
                           ),
                           const SizedBox(height: 24),
                           Center(

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:spensr/config/api_config.dart';
-import 'package:spensr/screen/text_transaction/viewmodel/get_transaction_view_model.dart';
-import 'package:spensr/services/token_service.dart';
+import 'package:walleta/config/api_config.dart';
+import 'package:walleta/services/token_service.dart';
 
 class TransactionService extends ChangeNotifier {
   List<TransactionModel> _transactions = [];
@@ -56,7 +56,7 @@ class TransactionService extends ChangeNotifier {
       }
 
       final response = await http.get(
-        Uri.parse('${ApiConfig.transactions}?email=$userEmail'), 
+        Uri.parse('${ApiConfig.transactions}?email=$userEmail'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -80,7 +80,9 @@ class TransactionService extends ChangeNotifier {
       }
     } catch (e) {
       _error = 'Sync Error: $e';
-      print('Sync Error: $e');
+      if (kDebugMode) {
+        print('Sync Error: $e');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -94,7 +96,8 @@ class TransactionService extends ChangeNotifier {
     required String emoji,
     required bool isIncome,
   }) async {
-    final String? userEmail = (await TokenService.getUserEmail()) ??
+    final String? userEmail =
+        (await TokenService.getUserEmail()) ??
         FirebaseAuth.instance.currentUser?.email;
 
     if (userEmail == null || userEmail.isEmpty) {
@@ -118,7 +121,7 @@ class TransactionService extends ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse(ApiConfig.transactions), // ✅
+        Uri.parse(ApiConfig.transactions),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -157,7 +160,9 @@ class TransactionService extends ChangeNotifier {
   }
 
   List<TransactionModel> getTransactionsForDateRange(
-      DateTime startDate, DateTime endDate) {
+    DateTime startDate,
+    DateTime endDate,
+  ) {
     final start = DateTime(startDate.year, startDate.month, startDate.day);
     final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
@@ -195,7 +200,9 @@ class TransactionService extends ChangeNotifier {
   }
 
   Map<String, double> getCategoryExpenses(
-      DateTime startDate, DateTime endDate) {
+    DateTime startDate,
+    DateTime endDate,
+  ) {
     final transactions = getTransactionsForDateRange(startDate, endDate);
     final categoryMap = <String, double>{};
 

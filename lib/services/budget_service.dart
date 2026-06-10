@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:spensr/config/api_config.dart';
-import 'package:spensr/services/token_service.dart';
-import 'package:spensr/screen/home/budget/viewmodel/budget_model.dart';
+import 'package:walleta/config/api_config.dart';
+import 'package:walleta/services/token_service.dart';
 
 class BudgetService extends ChangeNotifier {
-  static final String _baseUrl = ApiConfig.baseUrl + '/api';
+  static final String _baseUrl = '${ApiConfig.baseUrl}/api';
 
   List<BudgetModel> _budgets = [];
   List<BudgetModel> get budgets => _budgets;
@@ -42,16 +42,18 @@ class BudgetService extends ChangeNotifier {
         params['monthYear'] = monthYear;
       }
 
-      final uri = Uri.parse('$_baseUrl/budgets').replace(queryParameters: params);
+      final uri = Uri.parse(
+        '$_baseUrl/budgets',
+      ).replace(queryParameters: params);
 
       final response = await http
           .get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      )
+            uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -77,21 +79,29 @@ class BudgetService extends ChangeNotifier {
       }
     } on SocketException catch (e) {
       _error = 'Network error: cannot reach server (${e.message})';
-      print('SocketException fetching budgets: $e');
+      if (kDebugMode) {
+        print('SocketException fetching budgets: $e');
+      }
     } on TimeoutException catch (e) {
       _error = 'Request timed out while fetching budgets';
-      print('TimeoutException fetching budgets: $e');
+      if (kDebugMode) {
+        print('TimeoutException fetching budgets: $e');
+      }
     } catch (e) {
       _error = e.toString();
-      print('Error fetching budgets: $e');
+      if (kDebugMode) {
+        print('Error fetching budgets: $e');
+      }
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  // Get budget summary
-  Future<Map<String, dynamic>> getBudgetSummary(String email, {String? monthYear}) async {
+  Future<Map<String, dynamic>> getBudgetSummary(
+    String email, {
+    String? monthYear,
+  }) async {
     try {
       final token = await TokenService.getToken();
       if (token == null) {
@@ -103,31 +113,41 @@ class BudgetService extends ChangeNotifier {
         params['monthYear'] = monthYear;
       }
 
-      final uri = Uri.parse('$_baseUrl/budgets/summary').replace(queryParameters: params);
+      final uri = Uri.parse(
+        '$_baseUrl/budgets/summary',
+      ).replace(queryParameters: params);
 
       final response = await http
           .get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      )
+            uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to fetch budget summary: ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch budget summary: ${response.statusCode}',
+        );
       }
     } on SocketException catch (e) {
-      print('SocketException fetching budget summary: $e');
+      if (kDebugMode) {
+        print('SocketException fetching budget summary: $e');
+      }
       throw Exception('Network error: cannot reach server (${e.message})');
     } on TimeoutException catch (e) {
-      print('TimeoutException fetching budget summary: $e');
+      if (kDebugMode) {
+        print('TimeoutException fetching budget summary: $e');
+      }
       throw Exception('Request timed out while fetching budget summary');
     } catch (e) {
-      print('Error fetching budget summary: $e');
+      if (kDebugMode) {
+        print('Error fetching budget summary: $e');
+      }
       rethrow;
     }
   }
@@ -150,21 +170,21 @@ class BudgetService extends ChangeNotifier {
 
       final response = await http
           .post(
-        Uri.parse('$_baseUrl/budgets'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'limitAmount': limitAmount,
-          'category': category,
-          'period': period,
-          'monthYear': monthYear,
-          'alertThreshold': alertThreshold,
-          'alertsEnabled': alertsEnabled,
-        }),
-      )
+            Uri.parse('$_baseUrl/budgets'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'email': email,
+              'limitAmount': limitAmount,
+              'category': category,
+              'period': period,
+              'monthYear': monthYear,
+              'alertThreshold': alertThreshold,
+              'alertsEnabled': alertsEnabled,
+            }),
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 201) {
@@ -182,25 +202,33 @@ class BudgetService extends ChangeNotifier {
         notifyListeners();
         return budget;
       } else {
-  debugPrint('❌ CREATE BUDGET FAILED');
-  debugPrint('   Status: ${response.statusCode}');
-  debugPrint('   Body: ${response.body}');    
-  final error = jsonDecode(response.body);
-  throw Exception(error['message'] ?? 'Failed to create budget: ${response.statusCode} — ${response.body}');
-}
+        debugPrint('❌ CREATE BUDGET FAILED');
+        debugPrint('   Status: ${response.statusCode}');
+        debugPrint('   Body: ${response.body}');
+        final error = jsonDecode(response.body);
+        throw Exception(
+          error['message'] ??
+              'Failed to create budget: ${response.statusCode} — ${response.body}',
+        );
+      }
     } on SocketException catch (e) {
-      print('SocketException creating budget: $e');
+      if (kDebugMode) {
+        print('SocketException creating budget: $e');
+      }
       throw Exception('Network error: cannot reach server (${e.message})');
     } on TimeoutException catch (e) {
-      print('TimeoutException creating budget: $e');
+      if (kDebugMode) {
+        print('TimeoutException creating budget: $e');
+      }
       throw Exception('Request timed out while creating budget');
     } catch (e) {
-      print('Error creating budget: $e');
+      if (kDebugMode) {
+        print('Error creating budget: $e');
+      }
       rethrow;
     }
   }
 
-  // Update budget
   Future<BudgetModel> updateBudget({
     required String budgetId,
     double? limitAmount,
@@ -221,13 +249,13 @@ class BudgetService extends ChangeNotifier {
 
       final response = await http
           .put(
-        Uri.parse('$_baseUrl/budgets/$budgetId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      )
+            Uri.parse('$_baseUrl/budgets/$budgetId'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -252,18 +280,23 @@ class BudgetService extends ChangeNotifier {
         throw Exception('Failed to update budget: ${response.statusCode}');
       }
     } on SocketException catch (e) {
-      print('SocketException updating budget: $e');
+      if (kDebugMode) {
+        print('SocketException updating budget: $e');
+      }
       throw Exception('Network error: cannot reach server (${e.message})');
     } on TimeoutException catch (e) {
-      print('TimeoutException updating budget: $e');
+      if (kDebugMode) {
+        print('TimeoutException updating budget: $e');
+      }
       throw Exception('Request timed out while updating budget');
     } catch (e) {
-      print('Error updating budget: $e');
+      if (kDebugMode) {
+        print('Error updating budget: $e');
+      }
       rethrow;
     }
   }
 
-  // Delete budget
   Future<void> deleteBudget(String budgetId, String email) async {
     try {
       final token = await TokenService.getToken();
@@ -273,12 +306,14 @@ class BudgetService extends ChangeNotifier {
 
       final response = await http
           .delete(
-        Uri.parse('$_baseUrl/budgets/$budgetId').replace(queryParameters: {'email': email}),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      )
+            Uri.parse(
+              '$_baseUrl/budgets/$budgetId',
+            ).replace(queryParameters: {'email': email}),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -296,18 +331,23 @@ class BudgetService extends ChangeNotifier {
         throw Exception('Failed to delete budget: ${response.statusCode}');
       }
     } on SocketException catch (e) {
-      print('SocketException deleting budget: $e');
+      if (kDebugMode) {
+        print('SocketException deleting budget: $e');
+      }
       throw Exception('Network error: cannot reach server (${e.message})');
     } on TimeoutException catch (e) {
-      print('TimeoutException deleting budget: $e');
+      if (kDebugMode) {
+        print('TimeoutException deleting budget: $e');
+      }
       throw Exception('Request timed out while deleting budget');
     } catch (e) {
-      print('Error deleting budget: $e');
+      if (kDebugMode) {
+        print('Error deleting budget: $e');
+      }
       rethrow;
     }
   }
 
-  // Check budget limit before adding transaction
   Future<Map<String, dynamic>> checkBudgetLimit({
     required String email,
     required String category,
@@ -321,17 +361,17 @@ class BudgetService extends ChangeNotifier {
 
       final response = await http
           .post(
-        Uri.parse('$_baseUrl/budgets/check'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'category': category,
-          'amount': amount,
-        }),
-      )
+            Uri.parse('$_baseUrl/budgets/check'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'email': email,
+              'category': category,
+              'amount': amount,
+            }),
+          )
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -340,34 +380,40 @@ class BudgetService extends ChangeNotifier {
         throw Exception('Failed to check budget limit: ${response.statusCode}');
       }
     } on SocketException catch (e) {
-      print('SocketException checking budget limit: $e');
+      if (kDebugMode) {
+        print('SocketException checking budget limit: $e');
+      }
       throw Exception('Network error: cannot reach server (${e.message})');
     } on TimeoutException catch (e) {
-      print('TimeoutException checking budget limit: $e');
+      if (kDebugMode) {
+        print('TimeoutException checking budget limit: $e');
+      }
       throw Exception('Request timed out while checking budget limit');
     } catch (e) {
-      print('Error checking budget limit: $e');
+      if (kDebugMode) {
+        print('Error checking budget limit: $e');
+      }
       rethrow;
     }
   }
-void checkAndNotifyAlerts({
-  required void Function(BudgetModel budget) onAlert,
-}) {
-  for (final budget in _budgets) {
-    final alertsEnabled = budget.alertsEnabled ?? false;
-    final alreadySent   = budget.alertSent    ?? false;
 
-    if (!alertsEnabled) continue;
-    if (alreadySent)    continue;
-    if (!budget.isNearLimit && !budget.isExceeded) continue;
+  void checkAndNotifyAlerts({
+    required void Function(BudgetModel budget) onAlert,
+  }) {
+    for (final budget in _budgets) {
+      final alertsEnabled = budget.alertsEnabled ?? false;
+      final alreadySent = budget.alertSent ?? false;
 
-    onAlert(budget);
+      if (!alertsEnabled) continue;
+      if (alreadySent) continue;
+      if (!budget.isNearLimit && !budget.isExceeded) continue;
+
+      onAlert(budget);
+    }
   }
-}
-  // Clear error
+
   void clearError() {
     _error = null;
     notifyListeners();
   }
-
 }
