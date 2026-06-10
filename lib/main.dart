@@ -1,7 +1,29 @@
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'screen/splash/splash_view.dart';
+import 'package:provider/provider.dart';
+import 'package:walleta/firebase_options.dart';
+import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
+import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
+import 'package:walleta/screen/home/viewmodel/home_viewmodel.dart';
+import 'package:walleta/screen/splash/splash_view.dart';
+import 'package:walleta/theme/app_theme_manager.dart';
 
-void main() {
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const WalletaApp());
 }
 
@@ -10,13 +32,18 @@ class WalletaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Walleta',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1A5EA8)),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppThemeManager()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.light(),
+        home: const SplashScreen(),
       ),
-      home: const SplashScreen(),
     );
   }
 }
