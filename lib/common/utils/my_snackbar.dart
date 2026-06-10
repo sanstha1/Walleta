@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/theme/app_colors.dart';
 
 class SnackbarUtils {
   static void showError(BuildContext context, String message) {
     _showSnackBar(
       context,
       message,
-      backgroundColor: AppColors.error,
+      backgroundColor: AppColors.data().error,
       icon: Icons.error_outline_rounded,
     );
   }
@@ -14,7 +15,7 @@ class SnackbarUtils {
     _showSnackBar(
       context,
       message,
-      backgroundColor: AppColors.success,
+      backgroundColor: AppColors.data().success,
       icon: Icons.check_circle_outline_rounded,
     );
   }
@@ -23,7 +24,7 @@ class SnackbarUtils {
     _showSnackBar(
       context,
       message,
-      backgroundColor: AppColors.authPrimary,
+      backgroundColor: AppColors.data().info,
       icon: Icons.info_outline_rounded,
     );
   }
@@ -32,7 +33,7 @@ class SnackbarUtils {
     _showSnackBar(
       context,
       message,
-      backgroundColor: const Color(0xFFFFA726),
+      backgroundColor: AppColors.data().warning,
       icon: Icons.warning_amber_rounded,
     );
   }

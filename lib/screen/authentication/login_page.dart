@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pushAndRemoveUntil(
       // ignore: use_build_context_synchronously
       context,
-      MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+      MaterialPageRoute(builder: (_) => const BottomNavScreen()),
       (route) => false,
     );
   }
@@ -195,9 +195,7 @@ class _LoginPageState extends State<LoginPage> {
               Navigator.pushAndRemoveUntil(
                 // ignore: use_build_context_synchronously
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const BottomNavigationScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const BottomNavScreen()),
                 (route) => false,
               );
               // ignore: use_build_context_synchronously
@@ -276,7 +274,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushAndRemoveUntil(
             // ignore: use_build_context_synchronously
             context,
-            MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+            MaterialPageRoute(builder: (_) => const BottomNavScreen()),
             (route) => false,
           );
         }
