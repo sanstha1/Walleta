@@ -1,7 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:walleta/common/services/auth_method.dart';
 import 'package:walleta/screen/authentication/forget_password_page.dart';
 import 'package:walleta/screen/authentication/signup_page.dart';
+import 'package:walleta/screen/bottom_navigation_screen.dart';
+import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
+import 'package:walleta/services/auth_service.dart';
+import 'package:walleta/services/biometric_service.dart';
+import 'package:walleta/services/notification_service.dart';
+import 'package:walleta/services/token_service.dart';
+import 'package:walleta/common/utils/my_snackbar.dart';
+import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'package:walleta/widgets/gradient_button.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,10 +31,12 @@ class _LoginPageState extends State<LoginPage> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final _biometricService = BiometricService();
 
   @override
   void initState() {
     super.initState();
+    _checkBiometric();
   }
 
   @override
@@ -33,11 +46,60 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<void> _checkBiometric() async {
+    final available = await _biometricService.isAvailable();
+    final enabled = await TokenService.isBiometricEnabled();
+    final savedToken = await TokenService.getBiometricToken();
+    if (mounted) {
+      setState(
+        () => _biometricAvailable = available && enabled && savedToken != null,
+      );
+    }
+    if (_biometricAvailable) _triggerBiometric();
+  }
+
+  Future<void> _triggerBiometric() async {
+    final authenticated = await _biometricService.authenticate();
+    if (!authenticated || !mounted) return;
+
+    final savedToken = await TokenService.getBiometricToken();
+    final savedEmail = await TokenService.getBiometricEmail();
+
+    if (savedToken == null || savedEmail == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please login manually first to set up biometrics'),
+          ),
+        );
+      }
+      return;
+    }
+
+    await TokenService.save(savedToken);
+    await TokenService.saveUserEmail(savedEmail);
+    await NotificationService.syncFcmToken();
+    if (!mounted) return;
+    await Provider.of<ProfileViewModel>(context, listen: false).loadUserData();
+    Provider.of<NotificationViewModel>(
+      // ignore: use_build_context_synchronously
+      context,
+      listen: false,
+    ).restartListening();
+    Navigator.pushAndRemoveUntil(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+      (route) => false,
+    );
+  }
+
   String? _validateEmail(String? value) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (value == null || value.trim().isEmpty) return "Email is required";
-    if (!emailRegex.hasMatch(value.trim()))
+    if (!emailRegex.hasMatch(value.trim())) {
       return "Enter a valid email address";
+    }
     return null;
   }
 
@@ -45,6 +107,192 @@ class _LoginPageState extends State<LoginPage> {
     if (value == null || value.isEmpty) return "Password is required";
     if (value.length < 6) return "Min. 6 characters required";
     return null;
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => loading = true);
+    try {
+      final res = await AuthService().login(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
+
+      final int statusCode = res["status"];
+      final dynamic responseData = res["data"];
+
+      switch (statusCode) {
+        case 200:
+        case 201:
+          if (responseData != null && responseData["data"] != null) {
+            final token = responseData["data"]["accessToken"];
+            final userEmail = emailController.text.trim();
+            final password = passwordController.text.trim();
+
+            await TokenService.save(token);
+            await TokenService.saveUserEmail(userEmail);
+            await NotificationService.syncFcmToken();
+
+            final available = await _biometricService.isAvailable();
+            if (available && mounted) {
+              final alreadyEnabled = await TokenService.isBiometricEnabled();
+              if (!alreadyEnabled) {
+                final enable = await showDialog<bool>(
+                  // ignore: use_build_context_synchronously
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: Text(
+                      'Enable Biometrics',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    ),
+                    content: Text(
+                      'Would you like to use fingerprint or face ID to login next time?',
+                      style: GoogleFonts.poppins(fontSize: 14),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Yes'),
+                      ),
+                    ],
+                  ),
+                );
+                if (enable == true) {
+                  await TokenService.setBiometricEnabled(true);
+                  await TokenService.saveBiometricSession(token, userEmail);
+                }
+              } else {
+                await TokenService.saveBiometricSession(token, userEmail);
+              }
+            }
+
+            try {
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                email: userEmail,
+                password: password,
+              );
+            } catch (firebaseError) {
+              debugPrint("Firebase Sync Failed: $firebaseError");
+            }
+
+            if (mounted) {
+              await Provider.of<ProfileViewModel>(
+                context,
+                listen: false,
+              ).loadUserData();
+              Provider.of<NotificationViewModel>(
+                // ignore: use_build_context_synchronously
+                context,
+                listen: false,
+              ).restartListening();
+              Navigator.pushAndRemoveUntil(
+                // ignore: use_build_context_synchronously
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const BottomNavigationScreen(),
+                ),
+                (route) => false,
+              );
+              // ignore: use_build_context_synchronously
+              GoogleSignInService.updateTokenOnBackend(
+                userEmail,
+              ).catchError((e) => debugPrint(e));
+            }
+          } else {
+            _error("Server error: Missing session data.");
+          }
+          break;
+        case 401:
+          _error("Incorrect password.");
+          passwordController.clear();
+          break;
+        case 404:
+          _error("No account found.");
+          break;
+        default:
+          _error("Login failed ($statusCode)");
+      }
+    } catch (e) {
+      debugPrint("Login Exception: $e");
+      _error("Something went wrong.");
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  void _error(String msg) {
+    if (!mounted) return;
+    SnackbarUtils.showError(context, msg);
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (loading) return;
+    setState(() => loading = true);
+    try {
+      final userCredential = await GoogleSignInService.signInWithGoogle();
+      if (userCredential == null || !mounted) return;
+
+      final user = userCredential.user;
+      if (user == null) return;
+
+      final userEmail = user.email;
+      if (userEmail == null) return;
+
+      final firebaseIdToken = await user.getIdToken(true);
+      final res = await AuthService().googleSignIn(firebaseIdToken!);
+
+      if (res["status"] == 200) {
+        final jwt = res["data"]["data"]["accessToken"];
+        if (jwt == null) {
+          _error("Server did not return a token.");
+          return;
+        }
+
+        await TokenService.saveGoogleSession(token: jwt, email: userEmail);
+        await NotificationService.syncFcmToken();
+        if (!mounted) return;
+
+        await Provider.of<ProfileViewModel>(
+          context,
+          listen: false,
+        ).loadUserData();
+        Provider.of<NotificationViewModel>(
+          // ignore: use_build_context_synchronously
+          context,
+          listen: false,
+        ).restartListening();
+
+        if (widget.isFromPremium) {
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context, userEmail);
+        } else {
+          Navigator.pushAndRemoveUntil(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+            (route) => false,
+          );
+        }
+
+        GoogleSignInService.updateTokenOnBackend(userEmail).catchError((e) {
+          debugPrint("Non-critical FCM sync error: $e");
+        });
+      } else {
+        _error("Google Sign In failed. Please try again.");
+      }
+    } catch (e) {
+      debugPrint("Google Sign In Exception: $e");
+      _error("Google login failed.");
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
   }
 
   @override
@@ -68,7 +316,6 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.06),
                             blurRadius: 16,
                             offset: const Offset(0, 4),
@@ -149,6 +396,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (_biometricAvailable) ...[
                             const SizedBox(height: 12),
                             GestureDetector(
+                              onTap: _triggerBiometric,
                               child: Container(
                                 width: double.infinity,
                                 height: 50,
@@ -201,6 +449,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 20),
                           Center(
                             child: GestureDetector(
+                              onTap: _signInWithGoogle,
                               child: Container(
                                 width: 52,
                                 height: 52,
@@ -284,6 +533,7 @@ class _LoginPageState extends State<LoginPage> {
             // ignore: deprecated_member_use
             style: GoogleFonts.poppins(
               fontSize: 14,
+              // ignore: deprecated_member_use
               color: Colors.white.withOpacity(0.85),
             ),
           ),
