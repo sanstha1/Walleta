@@ -5,25 +5,17 @@ class CurrencyProvider extends ChangeNotifier {
   static const String _key = 'selected_currency';
 
   static const List<Map<String, String>> supportedCurrencies = [
-    {'symbol': 'Rs.', 'name': 'Nepali Rupee',   'code': 'NPR'},
-    {'symbol': '\$',  'name': 'US Dollar',       'code': 'USD'},
-    {'symbol': '€',   'name': 'Euro',            'code': 'EUR'},
-    {'symbol': '£',   'name': 'British Pound',   'code': 'GBP'},
-    {'symbol': '₹',   'name': 'Indian Rupee',    'code': 'INR'},
-    {'symbol': '¥',   'name': 'Japanese Yen',    'code': 'JPY'},
-    {'symbol': 'A\$', 'name': 'Australian Dollar','code': 'AUD'},
-    {'symbol': 'C\$', 'name': 'Canadian Dollar', 'code': 'CAD'},
+    {'symbol': 'Rs.', 'name': 'Nepali Rupee', 'code': 'NPR'},
   ];
 
   String _symbol = 'Rs.';
-  String _code   = 'NPR';
-  bool   _loaded = false;
+  String _code = 'NPR';
+  bool _loaded = false;
 
   String get symbol => _symbol;
-  String get code   => _code;
-  bool   get loaded => _loaded;
+  String get code => _code;
+  bool get loaded => _loaded;
 
-  /// Call once at startup — reads from SharedPreferences
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_key);
@@ -33,7 +25,7 @@ class CurrencyProvider extends ChangeNotifier {
         orElse: () => supportedCurrencies.first,
       );
       _symbol = match['symbol']!;
-      _code   = match['code']!;
+      _code = match['code']!;
     }
     _loaded = true;
     notifyListeners();
@@ -41,7 +33,7 @@ class CurrencyProvider extends ChangeNotifier {
 
   Future<void> setCurrency(Map<String, String> currency) async {
     _symbol = currency['symbol']!;
-    _code   = currency['code']!;
+    _code = currency['code']!;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, _code);
     notifyListeners();
