@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:walleta/onboarding/view/get_started.dart';
+import 'package:walleta/screen/onboarding/view/get_started.dart';
 
 class OnboardingViewModel extends ChangeNotifier {
   final PageController pageController = PageController();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:walleta/onboarding/viewmodel/onboarding_viewmodel.dart';
+import 'package:walleta/screen/onboarding/viewmodel/onboarding_viewmodel.dart';
 import 'package:walleta/widgets/gradient_button.dart';
 
 class OnboardingView extends StatelessWidget {

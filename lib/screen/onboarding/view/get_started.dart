@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
-import 'package:walleta/screen/onboarding/viewmodel/get_started_view_model.dart';
+import 'package:walleta/screen/onboarding/viewmodel/get_started_viewmodel.dart';
 import 'package:walleta/widgets/gradient_button.dart';
 
 class GetStartedView extends StatelessWidget {
