@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "118065038551",
+    "project_id": "walleta-3eb79",
+    "storage_bucket": "walleta-3eb79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118065038551:android:a0b7b85a823afa45a09c92",
+        "android_client_info": {
+          "package_name": "com.example.walleta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "118065038551-shgr0c7b9npoupkghkdckacv20fl9ots.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.walleta",
+            "certificate_hash": "4f4f512976a97402d533aab6c2cdb016b87e64ee"
+          }
+        },
+        {
+          "client_id": "118065038551-k2d1uekjv2vbv0agc6mgcgesf4fgbotf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ59b7ErAFoj1kgenoCiVuK7l3OmPkgis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "118065038551-k2d1uekjv2vbv0agc6mgcgesf4fgbotf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
