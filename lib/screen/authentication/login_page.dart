@@ -185,10 +185,12 @@ class _LoginPageState extends State<LoginPage> {
                 listen: false,
               ).loadUserData();
               Provider.of<NotificationViewModel>(
+                // ignore: use_build_context_synchronously
                 context,
                 listen: false,
               ).restartListening();
               Navigator.pushAndRemoveUntil(
+                // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (_) => const BottomNavScreen()),
                 (route) => false,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/screen/home/view/homeview.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -10,15 +11,13 @@ class BottomNavScreen extends StatefulWidget {
 class _BottomNavScreenState extends State<BottomNavScreen> {
   int _currentIndex = 0;
   final List<Widget> _screens = [
-    const Scaffold(body: Center(child: Text('Home'))),
+    const HomeScreen(),
     const Scaffold(body: Center(child: Text('Chart'))),
     const Scaffold(body: Center(child: Text('Report'))),
     const Scaffold(body: Center(child: Text('Account'))),
   ];
 
-  void _onVoiceTap() {
-    // TODO: trigger voice input
-  }
+  void _onVoiceTap() {}
 
   @override
   Widget build(BuildContext context) {

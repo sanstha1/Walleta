@@ -25,6 +25,7 @@ dependencies:
   light_sensor: ^3.0.2
   firebase_core: ^4.10.0
   intl: ^0.20.2
+  auto_route: ^11.1.0
 
 dev_dependencies:
   flutter_test:
