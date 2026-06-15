@@ -82,12 +82,10 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     await Provider.of<ProfileViewModel>(context, listen: false).loadUserData();
     Provider.of<NotificationViewModel>(
-      // ignore: use_build_context_synchronously
       context,
       listen: false,
     ).restartListening();
     Navigator.pushAndRemoveUntil(
-      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(builder: (_) => const BottomNavScreen()),
       (route) => false,
@@ -138,7 +136,6 @@ class _LoginPageState extends State<LoginPage> {
               final alreadyEnabled = await TokenService.isBiometricEnabled();
               if (!alreadyEnabled) {
                 final enable = await showDialog<bool>(
-                  // ignore: use_build_context_synchronously
                   context: context,
                   builder: (ctx) => AlertDialog(
                     shape: RoundedRectangleBorder(
@@ -188,17 +185,14 @@ class _LoginPageState extends State<LoginPage> {
                 listen: false,
               ).loadUserData();
               Provider.of<NotificationViewModel>(
-                // ignore: use_build_context_synchronously
                 context,
                 listen: false,
               ).restartListening();
               Navigator.pushAndRemoveUntil(
-                // ignore: use_build_context_synchronously
                 context,
                 MaterialPageRoute(builder: (_) => const BottomNavScreen()),
                 (route) => false,
               );
-              // ignore: use_build_context_synchronously
               GoogleSignInService.updateTokenOnBackend(
                 userEmail,
               ).catchError((e) => debugPrint(e));
@@ -262,17 +256,14 @@ class _LoginPageState extends State<LoginPage> {
           listen: false,
         ).loadUserData();
         Provider.of<NotificationViewModel>(
-          // ignore: use_build_context_synchronously
           context,
           listen: false,
         ).restartListening();
 
         if (widget.isFromPremium) {
-          // ignore: use_build_context_synchronously
           Navigator.pop(context, userEmail);
         } else {
           Navigator.pushAndRemoveUntil(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (_) => const BottomNavScreen()),
             (route) => false,
@@ -296,246 +287,198 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5F8),
+      backgroundColor: const Color(0xFFB0C4DE),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            child: Column(
-              children: [
-                _buildHeader(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Transform.translate(
-                    offset: const Offset(0, -20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'LOGIN',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF6B7280),
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          _buildLabel('Email'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: emailController,
-                            hint: 'Enter your email',
-                            validator: _validateEmail,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildLabel('Password'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: passwordController,
-                            hint: 'Enter your password',
-                            obscure: _obscurePassword,
-                            validator: _validatePassword,
-                            suffix: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: const Color(0xFF9CA3AF),
-                                size: 20,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ForgotPasswordPage(),
-                                ),
-                              ),
-                              child: Text(
-                                'Forgot password?',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: const Color(0xFF4A8F7A),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          GradientButton(
-                            onPressed: _handleLogin,
-                            text: 'LOGIN',
-                            isLoading: loading,
-                            height: 50,
-                            borderRadius: 12,
-                            fontSize: 15,
-                          ),
-                          if (_biometricAvailable) ...[
-                            const SizedBox(height: 12),
-                            GestureDetector(
-                              onTap: _triggerBiometric,
-                              child: Container(
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFF4A8F7A),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.fingerprint,
-                                      color: Color(0xFF4A8F7A),
-                                      size: 22,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Login with Biometrics',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: const Color(0xFF4A8F7A),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              const Expanded(child: Divider()),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  'or sign in with',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: const Color(0xFF9CA3AF),
-                                  ),
-                                ),
-                              ),
-                              const Expanded(child: Divider()),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Center(
-                            child: GestureDetector(
-                              onTap: _signInWithGoogle,
-                              child: Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: const Color(0xFFF3F4F6),
-                                  border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.g_mobiledata,
-                                  size: 32,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SignupPage(),
-                                ),
-                              ),
-                              child: RichText(
-                                text: TextSpan(
-                                  text: "Don't have an account? ",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Create an account',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        color: const Color(0xFF4A8F7A),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    'Walleta',
+                    style: GoogleFonts.poppins(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF4A8F7A),
+                    ),
+                  ),
+                  const SizedBox(height: 52),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'LOGIN',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1F2937),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Welcome Back!!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 38),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Email'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: emailController,
+                    hint: 'sthasantosh@gmail.com',
+                    validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Password'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: passwordController,
+                    hint: '••••••••••••',
+                    obscure: _obscurePassword,
+                    validator: _validatePassword,
+                    suffix: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: const Color(0xFF6B7280),
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordPage(),
+                        ),
+                      ),
+                      child: Text(
+                        'Forgot Password?',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: const Color(0xFF1F2937),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: GradientButton(
+                          onPressed: _handleLogin,
+                          text: 'LOGIN',
+                          isLoading: loading,
+                          height: 56,
+                          borderRadius: 28,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (_biometricAvailable) ...[
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _triggerBiometric,
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFFD1D5DB),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.fingerprint,
+                              color: Color(0xFF1F2937),
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 36),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: const Color(0xFF7C93AE))),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'or login with',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: const Color(0xFF6B7280),
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: const Color(0xFF7C93AE))),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: _signInWithGoogle,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Text(
+                        'G',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF4285F4),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignupPage()),
+                    ),
+                    child: Text(
+                      'Create an account',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: const Color(0xFF1F2937),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
-      color: const Color(0xFF4A8F7A),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Walleta',
-            style: GoogleFonts.poppins(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Welcome back!',
-            // ignore: deprecated_member_use
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              // ignore: deprecated_member_use
-              color: Colors.white.withOpacity(0.85),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -544,9 +487,9 @@ class _LoginPageState extends State<LoginPage> {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: const Color(0xFF374151),
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF1F2937),
       ),
     );
   }
@@ -568,10 +511,10 @@ class _LoginPageState extends State<LoginPage> {
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
           fontSize: 14,
-          color: const Color(0xFFD1D5DB),
+          color: const Color(0xFF6B7280),
         ),
         filled: true,
-        fillColor: const Color(0xFFF9FAFB),
+        fillColor: Colors.transparent,
         suffixIcon: suffix,
         errorStyle: GoogleFonts.poppins(fontSize: 11, color: Colors.redAccent),
         contentPadding: const EdgeInsets.symmetric(
@@ -580,11 +523,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFF374151)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFF374151)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

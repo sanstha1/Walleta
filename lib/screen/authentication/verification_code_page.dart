@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:walleta/screen/authentication/reset_password_page.dart';
+import 'package:walleta/widgets/gradient_button.dart';
 
 class VerificationCodePage extends StatefulWidget {
   final String email;
@@ -52,160 +53,138 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5F8),
+      backgroundColor: const Color(0xFFB0C4DE),
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Transform.translate(
-                    offset: const Offset(0, -20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 54, 24, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      left: 0,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF4A8F7A),
                           ),
-                        ],
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF4A8F7A).withOpacity(0.1),
-                            ),
-                            child: const Icon(
-                              Icons.email_outlined,
-                              color: Color(0xFF4A8F7A),
-                              size: 32,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Verification Code',
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF111827),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Please type the verification code sent to\n${widget.email}',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: const Color(0xFF6B7280),
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(6, (i) => _buildOtpBox(i)),
-                          ),
-                          const SizedBox(height: 12),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Resend code',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                color: const Color(0xFF4A8F7A),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: isLoading ? null : _handleVerify,
-                            child: Container(
-                              width: double.infinity,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4A8F7A),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Center(
-                                child: isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        'Verify',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    ),
+                    Center(
+                      child: Text(
+                        'Walleta',
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF4A8F7A),
+                        ),
                       ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Center(
+                  child: Text(
+                    'Verify Your Email',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1F2937),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 32),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 28),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB0C4DE),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: const Color(0xFF1F2937),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF9CA8BC),
+                        ),
+                        child: const Icon(
+                          Icons.email_outlined,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Verification Code',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF4A8F7A),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Please type the verification code sent to ${widget.email}',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: const Color(0xFF374151),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(6, (i) => _buildOtpBox(i)),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Resend code',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: const Color(0xFF1F2937),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      GradientButton(
+                        onPressed: _handleVerify,
+                        text: 'Verify',
+                        isLoading: isLoading,
+                        height: 50,
+                        borderRadius: 25,
+                        fontSize: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 24, 36),
-      color: const Color(0xFF4A8F7A),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-            padding: EdgeInsets.zero,
-          ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Text(
-              'Walleta',
-              style: GoogleFonts.poppins(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Text(
-              'Verify Your Email',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.white.withOpacity(0.85),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -228,15 +207,15 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
         decoration: InputDecoration(
           counterText: "",
           filled: true,
-          fillColor: const Color(0xFFF9FAFB),
+          fillColor: const Color(0xFFA9BFD7),
           contentPadding: EdgeInsets.zero,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            borderSide: const BorderSide(color: Color(0xFF1F2937)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            borderSide: const BorderSide(color: Color(0xFF1F2937)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

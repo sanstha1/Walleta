@@ -107,175 +107,145 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5F8),
+      backgroundColor: const Color(0xFFB0C4DE),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            child: Column(
-              children: [
-                _buildHeader(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Transform.translate(
-                    offset: const Offset(0, -20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            // ignore: deprecated_member_use
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    'Walleta',
+                    style: GoogleFonts.poppins(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF4A8F7A),
+                    ),
+                  ),
+                  const SizedBox(height: 52),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Create an account',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1F2937),
                       ),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Full Name'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: nameController,
+                    hint: 'Enter your full name',
+                    validator: _validateName,
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Email'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: emailController,
+                    hint: 'Enter your email',
+                    validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Password'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: passwordController,
+                    hint: 'Create a password',
+                    obscure: _obscurePassword,
+                    validator: _validatePassword,
+                    suffix: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: const Color(0xFF6B7280),
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildLabel('Confirm Password'),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: confirmController,
+                    hint: 'Confirm your password',
+                    obscure: _obscureConfirm,
+                    validator: (val) => (val == null || val.isEmpty)
+                        ? "Please confirm password"
+                        : null,
+                    suffix: IconButton(
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: const Color(0xFF6B7280),
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscureConfirm = !_obscureConfirm),
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  GradientButton(
+                    onPressed: _handleSignup,
+                    text: 'REGISTER',
+                    isLoading: loading,
+                    height: 56,
+                    borderRadius: 28,
+                    fontSize: 16,
+                  ),
+                  const SizedBox(height: 28),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Already have an account? ',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: const Color(0xFF6B7280),
+                        ),
                         children: [
-                          Text(
-                            'Create an account',
+                          TextSpan(
+                            text: 'Login',
                             style: GoogleFonts.poppins(
-                              fontSize: 18,
+                              fontSize: 14,
+                              color: const Color(0xFF1F2937),
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF111827),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          _buildLabel('Full Name'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: nameController,
-                            hint: 'Enter your full name',
-                            validator: _validateName,
-                          ),
-                          const SizedBox(height: 14),
-                          _buildLabel('Email'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: emailController,
-                            hint: 'Enter your email',
-                            validator: _validateEmail,
-                          ),
-                          const SizedBox(height: 14),
-                          _buildLabel('Password'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: passwordController,
-                            hint: 'Create a password',
-                            obscure: _obscurePassword,
-                            validator: _validatePassword,
-                            suffix: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: const Color(0xFF9CA3AF),
-                                size: 20,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          _buildLabel('Confirm Password'),
-                          const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: confirmController,
-                            hint: 'Confirm your password',
-                            obscure: _obscureConfirm,
-                            validator: (val) => (val == null || val.isEmpty)
-                                ? "Please confirm password"
-                                : null,
-                            suffix: IconButton(
-                              icon: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: const Color(0xFF9CA3AF),
-                                size: 20,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          GradientButton(
-                            onPressed: _handleSignup,
-                            text: 'Register',
-                            isLoading: loading,
-                            height: 50,
-                            borderRadius: 12,
-                            fontSize: 15,
-                          ),
-                          const SizedBox(height: 24),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: RichText(
-                                text: TextSpan(
-                                  text: 'Already have an account? ',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Login',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        color: const Color(0xFF4A8F7A),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
-      color: const Color(0xFF4A8F7A),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Walleta',
-            style: GoogleFonts.poppins(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Get Started!',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.85),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -284,9 +254,9 @@ class _SignupPageState extends State<SignupPage> {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: const Color(0xFF374151),
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF1F2937),
       ),
     );
   }
@@ -308,10 +278,10 @@ class _SignupPageState extends State<SignupPage> {
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
           fontSize: 14,
-          color: const Color(0xFFD1D5DB),
+          color: const Color(0xFF6B7280),
         ),
         filled: true,
-        fillColor: const Color(0xFFF9FAFB),
+        fillColor: Colors.transparent,
         suffixIcon: suffix,
         errorStyle: GoogleFonts.poppins(fontSize: 11, color: Colors.redAccent),
         contentPadding: const EdgeInsets.symmetric(
@@ -320,11 +290,11 @@ class _SignupPageState extends State<SignupPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFF374151)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: Color(0xFF374151)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
