@@ -7,6 +7,8 @@ import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
 import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'package:walleta/screen/home/viewmodel/home_viewmodel.dart';
 import 'package:walleta/screen/splash/splash_view.dart';
+import 'package:walleta/services/currency_service.dart';
+import 'package:walleta/services/transaction_service.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
 
 class MyHttpOverrides extends HttpOverrides {
@@ -38,6 +40,8 @@ class WalletaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
         ChangeNotifierProvider(create: (_) => HomeViewModel()),
         ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+        ChangeNotifierProvider(create: (_) => CurrencyProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionService()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

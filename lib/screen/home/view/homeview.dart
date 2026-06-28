@@ -6,6 +6,8 @@ import 'package:walleta/screen/home/view/weekly_view.dart';
 import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
 import 'package:walleta/theme/app_colors.dart';
 
+const Color _accentTeal = Color(0xFF006A60);
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -42,22 +44,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    "Welcome, $name",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: colors.primaryText,
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.white,
+                    child: const Icon(Icons.person, color: Color(0xFF1C3343)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Welcome, $name",
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: colors.primaryText,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Have a great day!",
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 14,
+                            color: colors.disabledText,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Have a great day!",
-                    style: TextStyle(fontSize: 16, color: colors.disabledText),
-                  ),
+                  Icon(Icons.notifications_none, color: _accentTeal, size: 26),
                 ],
               ),
             ),
@@ -66,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: colors.containerBG,
+                  color: colors.tileBG,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TabBar(
@@ -74,15 +94,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   labelColor: Colors.white,
                   unselectedLabelColor: colors.disabledText,
                   indicator: BoxDecoration(
-                    color: colors.primary,
+                    color: _accentTeal,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
+                  labelStyle: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                  ),
                   tabs: const [
-                    Tab(child: Text("Daily", style: TextStyle(fontSize: 14))),
-                    Tab(child: Text("Weekly", style: TextStyle(fontSize: 14))),
-                    Tab(child: Text("Monthly", style: TextStyle(fontSize: 14))),
+                    Tab(child: Text("Daily")),
+                    Tab(child: Text("Weekly")),
+                    Tab(child: Text("Monthly")),
                   ],
                 ),
               ),

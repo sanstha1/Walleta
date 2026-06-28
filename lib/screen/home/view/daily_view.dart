@@ -1,5 +1,3 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +5,10 @@ import 'package:walleta/screen/home/viewmodel/home_viewmodel.dart';
 import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/services/transaction_service.dart';
 import 'package:walleta/theme/app_colors.dart';
+
+const Color _accentTeal = Color(0xFF006A60);
+const Color _expenseDeep = Color(0xFFBA1A1A);
+const Color _incomeDeep = Color(0xFF10B981);
 
 class DailyView extends StatelessWidget {
   const DailyView({super.key});
@@ -48,64 +50,20 @@ class DailyView extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colors.containerBG,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Expense",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colors.disabledText,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "-$currency${dailyExpense.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _buildSummaryCard(
+                    "Expense",
+                    "$currency${dailyExpense.toStringAsFixed(2)}",
+                    _expenseDeep,
+                    colors,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colors.containerBG,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Income",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colors.disabledText,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "+$currency${dailyIncome.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: _buildSummaryCard(
+                    "Income",
+                    "$currency${dailyIncome.toStringAsFixed(2)}",
+                    _incomeDeep,
+                    colors,
                   ),
                 ),
               ],
@@ -116,8 +74,9 @@ class DailyView extends StatelessWidget {
             Text(
               DateFormat('EEEE, MMMM d').format(DateTime.now()),
               style: TextStyle(
+                fontFamily: 'monospace',
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: colors.primaryText,
               ),
             ),
@@ -128,7 +87,7 @@ class DailyView extends StatelessWidget {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
-                  child: CircularProgressIndicator(color: colors.primary),
+                  child: CircularProgressIndicator(color: _accentTeal),
                 ),
               )
             else if (dailyTransactions.isEmpty)
@@ -145,6 +104,7 @@ class DailyView extends StatelessWidget {
                     Text(
                       "No transactions today",
                       style: TextStyle(
+                        fontFamily: 'monospace',
                         fontSize: 16,
                         color: colors.disabledText,
                       ),
@@ -156,7 +116,7 @@ class DailyView extends StatelessWidget {
               Column(
                 children: dailyTransactions.map((tx) {
                   final isIncome = tx.isIncome ?? false;
-                  final iconColor = isIncome ? Colors.green : Colors.red;
+                  final iconColor = isIncome ? colors.success : colors.error;
                   final time = tx.createdAt != null
                       ? DateFormat('h:mm a').format(tx.createdAt!)
                       : '';
@@ -175,7 +135,7 @@ class DailyView extends StatelessWidget {
                           height: 40,
                           decoration: BoxDecoration(
                             // ignore: deprecated_member_use
-                            color: iconColor.withOpacity(0.15),
+                            color: iconColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -193,8 +153,9 @@ class DailyView extends StatelessWidget {
                               Text(
                                 tx.title ?? 'No Title',
                                 style: TextStyle(
+                                  fontFamily: 'monospace',
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: colors.primaryText,
                                 ),
                               ),
@@ -202,7 +163,8 @@ class DailyView extends StatelessWidget {
                               Text(
                                 '${tx.category ?? 'No Category'} • $time',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontFamily: 'monospace',
+                                  fontSize: 13,
                                   color: colors.disabledText,
                                 ),
                               ),
@@ -212,9 +174,10 @@ class DailyView extends StatelessWidget {
                         Text(
                           "${isIncome ? '+' : '-'}$currency${tx.amount?.toStringAsFixed(2) ?? '0.00'}",
                           style: TextStyle(
+                            fontFamily: 'monospace',
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: iconColor,
+                            fontWeight: FontWeight.w700,
+                            color: isIncome ? _incomeDeep : _expenseDeep,
                           ),
                         ),
                       ],
@@ -230,49 +193,123 @@ class DailyView extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       transactionService.fetchTransactions();
-                      // ignore: invalid_use_of_protected_member
+                      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
                       homeViewModel.notifyListeners();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primary,
+                      backgroundColor: _accentTeal,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
                       ),
                     ),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh'),
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: const Text(
+                      'Refresh',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ),
 
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colors.containerBG,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isPositive ? Colors.green : Colors.red,
-                  width: 2,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Today's Balance",
-                    style: TextStyle(fontSize: 16, color: colors.primaryText),
+
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: colors.containerBG,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  Text(
-                    "${isPositive ? '+' : ''}$currency${balance.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: isPositive ? Colors.green : Colors.red,
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Today's Balance",
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: colors.primaryText,
+                        ),
+                      ),
+                      Text(
+                        "${isPositive ? '+' : ''}$currency${balance.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: isPositive ? colors.success : colors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _DashedRRectPainter(
+                      color: isPositive ? colors.success : colors.error,
+                      radius: 16,
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+    String label,
+    String amount,
+    Color accentColor,
+    AppColors colors,
+  ) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        color: colors.containerBG,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: accentColor),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        color: colors.disabledText,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      amount,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -280,4 +317,47 @@ class DailyView extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  _DashedRRectPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0.75, 0.75, size.width - 1.5, size.height - 1.5),
+      Radius.circular(radius),
+    );
+
+    final path = Path()..addRRect(rrect);
+    final dashPath = Path();
+    const dashWidth = 6.0;
+    const dashSpace = 4.0;
+
+    for (final metric in path.computeMetrics()) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final next = distance + dashWidth;
+        dashPath.addPath(
+          metric.extractPath(distance, next.clamp(0, metric.length)),
+          Offset.zero,
+        );
+        distance = next + dashSpace;
+      }
+    }
+
+    canvas.drawPath(dashPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
 }

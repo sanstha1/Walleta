@@ -6,6 +6,10 @@ import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/services/transaction_service.dart';
 import 'package:walleta/theme/app_colors.dart';
 
+const Color _accentTeal = Color(0xFF006A60);
+const Color _expenseDeep = Color(0xFFBA1A1A);
+const Color _incomeDeep = Color(0xFF10B981);
+
 class MonthlyView extends StatelessWidget {
   const MonthlyView({super.key});
 
@@ -38,8 +42,8 @@ class MonthlyView extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.arrow_back_ios,
-                    color: colors.primaryText,
-                    size: 20,
+                    color: colors.disabledText,
+                    size: 18,
                   ),
                   onPressed: () => homeViewModel.changeMonth(-1),
                 ),
@@ -48,8 +52,9 @@ class MonthlyView extends StatelessWidget {
                     Text(
                       '${homeViewModel.getMonthName()} ${homeViewModel.selectedDate.year}',
                       style: TextStyle(
+                        fontFamily: 'monospace',
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: colors.primaryText,
                       ),
                     ),
@@ -57,7 +62,8 @@ class MonthlyView extends StatelessWidget {
                     Text(
                       'Total: $currency${(monthlyIncome - monthlyExpense).toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontFamily: 'monospace',
+                        fontSize: 13,
                         color: colors.disabledText,
                       ),
                     ),
@@ -66,8 +72,8 @@ class MonthlyView extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.arrow_forward_ios,
-                    color: colors.primaryText,
-                    size: 20,
+                    color: colors.disabledText,
+                    size: 18,
                   ),
                   onPressed:
                       homeViewModel.selectedDate.month < DateTime.now().month
@@ -83,64 +89,20 @@ class MonthlyView extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: colors.containerBG,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Expense",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: colors.disabledText,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "-$currency${monthlyExpense.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _buildSummaryCard(
+                  "Expense",
+                  "$currency${monthlyExpense.toStringAsFixed(2)}",
+                  _expenseDeep,
+                  colors,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: colors.containerBG,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Income",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: colors.disabledText,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "+$currency${monthlyIncome.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _buildSummaryCard(
+                  "Income",
+                  "$currency${monthlyIncome.toStringAsFixed(2)}",
+                  _incomeDeep,
+                  colors,
                 ),
               ),
             ],
@@ -171,15 +133,20 @@ class MonthlyView extends StatelessWidget {
               Text(
                 'This Month',
                 style: TextStyle(
+                  fontFamily: 'monospace',
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: colors.primaryText,
                 ),
               ),
               if (monthlyTransactions.isNotEmpty)
                 Text(
                   "${monthlyTransactions.length} transactions",
-                  style: TextStyle(fontSize: 14, color: colors.disabledText),
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    color: colors.disabledText,
+                  ),
                 ),
             ],
           ),
@@ -191,7 +158,7 @@ class MonthlyView extends StatelessWidget {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),
-                    child: CircularProgressIndicator(color: colors.primary),
+                    child: CircularProgressIndicator(color: _accentTeal),
                   ),
                 );
               }
@@ -209,6 +176,7 @@ class MonthlyView extends StatelessWidget {
                       Text(
                         "No transactions this month",
                         style: TextStyle(
+                          fontFamily: 'monospace',
                           fontSize: 16,
                           color: colors.disabledText,
                         ),
@@ -221,7 +189,7 @@ class MonthlyView extends StatelessWidget {
               return Column(
                 children: monthlyTransactions.take(10).map((tx) {
                   final isIncome = tx.isIncome ?? false;
-                  final iconColor = isIncome ? Colors.green : Colors.red;
+                  final iconColor = isIncome ? colors.success : colors.error;
                   final date = tx.createdAt != null
                       ? DateFormat('MMM d').format(tx.createdAt!)
                       : '';
@@ -240,7 +208,7 @@ class MonthlyView extends StatelessWidget {
                           height: 40,
                           decoration: BoxDecoration(
                             // ignore: deprecated_member_use
-                            color: iconColor.withOpacity(0.15),
+                            color: iconColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -258,8 +226,9 @@ class MonthlyView extends StatelessWidget {
                               Text(
                                 tx.title ?? 'No Title',
                                 style: TextStyle(
+                                  fontFamily: 'monospace',
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: colors.primaryText,
                                 ),
                               ),
@@ -267,7 +236,8 @@ class MonthlyView extends StatelessWidget {
                               Text(
                                 '${tx.category ?? 'No Category'} • $date',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontFamily: 'monospace',
+                                  fontSize: 13,
                                   color: colors.disabledText,
                                 ),
                               ),
@@ -277,9 +247,10 @@ class MonthlyView extends StatelessWidget {
                         Text(
                           "${isIncome ? '+' : '-'}$currency${tx.amount?.toStringAsFixed(2) ?? '0.00'}",
                           style: TextStyle(
+                            fontFamily: 'monospace',
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: iconColor,
+                            fontWeight: FontWeight.w700,
+                            color: isIncome ? _incomeDeep : _expenseDeep,
                           ),
                         ),
                       ],
@@ -290,6 +261,54 @@ class MonthlyView extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+    String label,
+    String amount,
+    Color accentColor,
+    AppColors colors,
+  ) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        color: colors.containerBG,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: accentColor),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        color: colors.disabledText,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      amount,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -305,17 +324,17 @@ class MonthlyView extends StatelessWidget {
       return Center(
         child: Text(
           'No data for this month',
-          style: TextStyle(color: colors.disabledText),
+          style: TextStyle(fontFamily: 'monospace', color: colors.disabledText),
         ),
       );
     }
 
-    final maxValue = chartData.values.isNotEmpty
-        ? chartData.values.reduce((a, b) => a > b ? a : b)
-        : 100;
     final weeks = chartData.keys.toList();
     final weekCount = weeks.length;
     final incomePerWeek = weekCount > 0 ? totalIncome / weekCount : 0.0;
+    final maxValue = chartData.values.reduce((a, b) => a > b ? a : b);
+    final combinedMax = maxValue > incomePerWeek ? maxValue : incomePerWeek;
+    final displayMax = combinedMax == 0 ? 100.0 : combinedMax;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,8 +342,9 @@ class MonthlyView extends StatelessWidget {
         Text(
           "Monthly Spending by Week",
           style: TextStyle(
+            fontFamily: 'monospace',
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: colors.primaryText,
           ),
         ),
@@ -334,105 +354,96 @@ class MonthlyView extends StatelessWidget {
             Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(2),
+              decoration: const BoxDecoration(
+                color: _expenseDeep,
+                shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 4),
             Text(
               "Expense",
-              style: TextStyle(fontSize: 11, color: colors.disabledText),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: colors.disabledText,
+              ),
             ),
             const SizedBox(width: 12),
             Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(2),
+              decoration: const BoxDecoration(
+                color: _accentTeal,
+                shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 4),
             Text(
               "Income",
-              style: TextStyle(fontSize: 11, color: colors.disabledText),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: colors.disabledText,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         SizedBox(
-          height: 180,
+          height: 170,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: chartData.entries.map((entry) {
-              final combinedMax = maxValue > incomePerWeek
-                  ? maxValue
-                  : incomePerWeek;
-              final expenseHeight = combinedMax > 0
-                  ? (entry.value / combinedMax) * 120
-                  : 0.0;
-              final incomeHeight = combinedMax > 0
-                  ? (incomePerWeek / combinedMax) * 120
-                  : 0.0;
+              final expenseValue = entry.value;
+              final isExpenseDominant = expenseValue >= incomePerWeek;
+              final value = isExpenseDominant ? expenseValue : incomePerWeek;
+              final barColor = isExpenseDominant ? _expenseDeep : _accentTeal;
+              final barHeight = displayMax > 0
+                  ? (value / displayMax * 110).clamp(10.0, 110.0)
+                  : 10.0;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            "$currency${entry.value.toStringAsFixed(0)}",
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: colors.disabledText,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            width: 14,
-                            height: expenseHeight.clamp(4.0, 120.0),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
+                  Text(
+                    "$currency${value.toStringAsFixed(0)}",
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 9,
+                      color: colors.disabledText,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 14,
+                    height: barHeight,
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(7),
                       ),
-                      const SizedBox(width: 3),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            "$currency${incomePerWeek.toStringAsFixed(0)}",
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: colors.disabledText,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            width: 14,
-                            height: incomeHeight.clamp(4.0, 120.0),
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
+                    ),
+                  ),
+                  Container(
+                    width: 14,
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      color: _expenseDeep,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(7),
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     entry.key,
-                    style: TextStyle(fontSize: 12, color: colors.disabledText),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: colors.disabledText,
+                    ),
                   ),
                 ],
               );

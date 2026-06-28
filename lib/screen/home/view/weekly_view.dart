@@ -5,6 +5,10 @@ import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/services/transaction_service.dart';
 import 'package:walleta/theme/app_colors.dart';
 
+const Color _accentTeal = Color(0xFF006A60);
+const Color _expenseDeep = Color(0xFFBA1A1A);
+const Color _incomeDeep = Color(0xFF10B981);
+
 class WeeklyView extends StatelessWidget {
   const WeeklyView({super.key});
 
@@ -45,20 +49,18 @@ class WeeklyView extends StatelessWidget {
               Expanded(
                 child: _buildSummaryCard(
                   "Expense",
-                  weeklyExpense,
-                  Colors.red,
+                  "$currency${weeklyExpense.toStringAsFixed(2)}",
+                  _expenseDeep,
                   colors,
-                  currency,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildSummaryCard(
                   "Income",
-                  weeklyIncome,
-                  Colors.green,
+                  "$currency${weeklyIncome.toStringAsFixed(2)}",
+                  _incomeDeep,
                   colors,
-                  currency,
                 ),
               ),
             ],
@@ -78,15 +80,20 @@ class WeeklyView extends StatelessWidget {
               children: [
                 Text(
                   "Total Balance this Week",
-                  style: TextStyle(fontSize: 14, color: colors.disabledText),
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    color: colors.disabledText,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "$currency${balance.toStringAsFixed(2)}",
                   style: TextStyle(
+                    fontFamily: 'monospace',
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
-                    color: isPositive ? Colors.green : Colors.red,
+                    color: isPositive ? _incomeDeep : _expenseDeep,
                   ),
                 ),
               ],
@@ -112,14 +119,19 @@ class WeeklyView extends StatelessWidget {
               Text(
                 "Recent Activity",
                 style: TextStyle(
+                  fontFamily: 'monospace',
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: colors.primaryText,
                 ),
               ),
               Text(
                 "${weeklyTransactions.length} items",
-                style: TextStyle(fontSize: 14, color: colors.disabledText),
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  color: colors.disabledText,
+                ),
               ),
             ],
           ),
@@ -127,7 +139,7 @@ class WeeklyView extends StatelessWidget {
           const SizedBox(height: 16),
 
           if (transactionService.isLoading)
-            const Center(child: CircularProgressIndicator())
+            Center(child: CircularProgressIndicator(color: _accentTeal))
           else if (weeklyTransactions.isEmpty)
             _buildEmptyState(colors)
           else
@@ -149,37 +161,51 @@ class WeeklyView extends StatelessWidget {
   }
 
   Widget _buildSummaryCard(
-    String title,
-    double amount,
-    Color amountColor,
+    String label,
+    String amount,
+    Color accentColor,
     AppColors colors,
-    String currency,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
         color: colors.containerBG,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(fontSize: 12, color: colors.disabledText),
-          ),
-          const SizedBox(height: 4),
-          FittedBox(
-            child: Text(
-              "$currency${amount.toStringAsFixed(2)}",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: amountColor,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: accentColor),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        color: colors.disabledText,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      child: Text(
+                        amount,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -189,10 +215,9 @@ class WeeklyView extends StatelessWidget {
     AppColors colors,
     String currency,
   ) {
-    final allValues = chartData.values.expand((m) => m.values);
-    final maxVal = allValues.isEmpty
-        ? 100.0
-        : allValues.reduce((a, b) => a > b ? a : b);
+    final maxVal = chartData.values
+        .expand((m) => [m['expense'] ?? 0, m['income'] ?? 0])
+        .fold(0.0, (a, b) => a > b ? a : b);
     final displayMax = maxVal == 0 ? 100.0 : maxVal;
 
     return Column(
@@ -201,8 +226,10 @@ class WeeklyView extends StatelessWidget {
         Text(
           "Spending Trend",
           style: TextStyle(
+            fontFamily: 'monospace',
             color: colors.primaryText,
             fontWeight: FontWeight.bold,
+            fontSize: 15,
           ),
         ),
         const SizedBox(height: 8),
@@ -211,33 +238,41 @@ class WeeklyView extends StatelessWidget {
             Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(2),
+              decoration: const BoxDecoration(
+                color: _expenseDeep,
+                shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 4),
             Text(
               "Expense",
-              style: TextStyle(fontSize: 11, color: colors.disabledText),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: colors.disabledText,
+              ),
             ),
             const SizedBox(width: 12),
             Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(2),
+              decoration: const BoxDecoration(
+                color: _accentTeal,
+                shape: BoxShape.circle,
               ),
             ),
             const SizedBox(width: 4),
             Text(
               "Income",
-              style: TextStyle(fontSize: 11, color: colors.disabledText),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: colors.disabledText,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         SizedBox(
           height: 150,
           child: Row(
@@ -246,76 +281,48 @@ class WeeklyView extends StatelessWidget {
             children: chartData.entries.map((entry) {
               final expense = entry.value['expense'] ?? 0;
               final income = entry.value['income'] ?? 0;
-              final expenseHeight = (expense / displayMax * 100).clamp(
-                expense > 0 ? 4.0 : 0.0,
-                100.0,
-              );
-              final incomeHeight = (income / displayMax * 100).clamp(
-                income > 0 ? 4.0 : 0.0,
-                100.0,
-              );
+              final hasData = expense > 0 || income > 0;
+              final isExpenseDominant = expense >= income;
+              final value = isExpenseDominant ? expense : income;
+              final barColor = isExpenseDominant ? _expenseDeep : _accentTeal;
+              final barHeight = hasData
+                  ? (value / displayMax * 110).clamp(6.0, 110.0)
+                  : 6.0;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            "$currency${expense.toInt()}",
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: colors.disabledText,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            width: 12,
-                            height: expenseHeight,
-                            decoration: BoxDecoration(
-                              color: expense > 0
-                                  ? Colors.red
-                                  // ignore: deprecated_member_use
-                                  : colors.disabledText.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
+                  if (hasData)
+                    Text(
+                      "$currency${value.toInt()}",
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 9,
+                        color: colors.disabledText,
                       ),
-                      const SizedBox(width: 3),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            "$currency${income.toInt()}",
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: colors.disabledText,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            width: 12,
-                            height: incomeHeight,
-                            decoration: BoxDecoration(
-                              color: income > 0
-                                  ? Colors.green
-                                  // ignore: deprecated_member_use
-                                  : colors.disabledText.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 18,
+                    height: barHeight,
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: hasData
+                          ? barColor.withOpacity(0.8)
+                          // ignore: deprecated_member_use
+                          : colors.disabledText.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     entry.key,
-                    style: TextStyle(fontSize: 12, color: colors.disabledText),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: colors.disabledText,
+                    ),
                   ),
                 ],
               );
@@ -328,7 +335,8 @@ class WeeklyView extends StatelessWidget {
 
   Widget _buildTransactionItem(dynamic tx, AppColors colors, String currency) {
     final isIncome = tx.isIncome ?? false;
-    final color = isIncome ? Colors.green : Colors.red;
+    final color = isIncome ? colors.success : colors.error;
+    final amountColor = isIncome ? _incomeDeep : _expenseDeep;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -341,7 +349,7 @@ class WeeklyView extends StatelessWidget {
         children: [
           CircleAvatar(
             // ignore: deprecated_member_use
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withOpacity(0.12),
             child: Icon(
               isIncome ? Icons.south_west : Icons.north_east,
               color: color,
@@ -356,20 +364,29 @@ class WeeklyView extends StatelessWidget {
                 Text(
                   tx.title ?? 'Unknown',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w600,
                     color: colors.primaryText,
                   ),
                 ),
                 Text(
                   tx.category ?? 'General',
-                  style: TextStyle(fontSize: 12, color: colors.disabledText),
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    color: colors.disabledText,
+                  ),
                 ),
               ],
             ),
           ),
           Text(
             "${isIncome ? '+' : '-'}$currency${tx.amount?.toStringAsFixed(2)}",
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
           ),
         ],
       ),
@@ -382,7 +399,7 @@ class WeeklyView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 40),
         child: Text(
           "No transactions recorded this week.",
-          style: TextStyle(color: colors.disabledText),
+          style: TextStyle(fontFamily: 'monospace', color: colors.disabledText),
         ),
       ),
     );
