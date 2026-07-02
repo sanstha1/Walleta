@@ -65,9 +65,7 @@ class WeeklyView extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 20),
-
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -99,9 +97,7 @@ class WeeklyView extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -110,9 +106,7 @@ class WeeklyView extends StatelessWidget {
             ),
             child: _buildWeeklyChart(weeklyChartData, colors, currency),
           ),
-
           const SizedBox(height: 24),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -135,9 +129,7 @@ class WeeklyView extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           if (transactionService.isLoading)
             Center(child: CircularProgressIndicator(color: _accentTeal))
           else if (weeklyTransactions.isEmpty)
@@ -170,41 +162,43 @@ class WeeklyView extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         color: colors.containerBG,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 4, color: accentColor),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        color: colors.disabledText,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    FittedBox(
-                      child: Text(
-                        amount,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: accentColor),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
                         style: TextStyle(
                           fontFamily: 'monospace',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: accentColor,
+                          fontSize: 12,
+                          color: colors.disabledText,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 6),
+                      FittedBox(
+                        child: Text(
+                          amount,
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -307,10 +301,8 @@ class WeeklyView extends StatelessWidget {
                     width: 18,
                     height: barHeight,
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
                       color: hasData
                           ? barColor.withOpacity(0.8)
-                          // ignore: deprecated_member_use
                           : colors.disabledText.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
@@ -348,7 +340,6 @@ class WeeklyView extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            // ignore: deprecated_member_use
             backgroundColor: color.withOpacity(0.12),
             child: Icon(
               isIncome ? Icons.south_west : Icons.north_east,

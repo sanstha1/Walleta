@@ -6,7 +6,7 @@ import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/theme/app_theme.dart';
 
 class AppThemeManager extends ChangeNotifier {
-  bool _isDark = true;
+  bool _isDark = false;
   bool _autoLight = false;
   StreamSubscription<int>? _lightSubscription;
 
@@ -21,7 +21,7 @@ class AppThemeManager extends ChangeNotifier {
 
   Future<void> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    _isDark = prefs.getBool('isDarkMode') ?? true;
+    _isDark = prefs.getBool('isDarkMode') ?? false;
     _autoLight = prefs.getBool('autoLight') ?? false;
     if (_autoLight) _startLightSensor();
     notifyListeners();

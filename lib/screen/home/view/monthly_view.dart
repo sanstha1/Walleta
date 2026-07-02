@@ -83,9 +83,7 @@ class MonthlyView extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
           Row(
             children: [
               Expanded(
@@ -107,9 +105,7 @@ class MonthlyView extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 20),
-
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -124,9 +120,7 @@ class MonthlyView extends StatelessWidget {
               currency,
             ),
           ),
-
           const SizedBox(height: 24),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -151,7 +145,6 @@ class MonthlyView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
           Consumer<TransactionService>(
             builder: (context, service, child) {
               if (service.isLoading) {
@@ -207,7 +200,6 @@ class MonthlyView extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            // ignore: deprecated_member_use
                             color: iconColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -275,39 +267,41 @@ class MonthlyView extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         color: colors.containerBG,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 4, color: accentColor),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                        color: colors.disabledText,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: accentColor),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          color: colors.disabledText,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      amount,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: accentColor,
+                      const SizedBox(height: 6),
+                      Text(
+                        amount,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

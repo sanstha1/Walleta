@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element_parameter
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -68,9 +70,7 @@ class DailyView extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
-
             Text(
               DateFormat('EEEE, MMMM d').format(DateTime.now()),
               style: TextStyle(
@@ -80,9 +80,7 @@ class DailyView extends StatelessWidget {
                 color: colors.primaryText,
               ),
             ),
-
             const SizedBox(height: 16),
-
             if (transactionService.isLoading)
               Center(
                 child: Padding(
@@ -185,7 +183,6 @@ class DailyView extends StatelessWidget {
                   );
                 }).toList(),
               ),
-
             if (!transactionService.isLoading)
               Padding(
                 padding: const EdgeInsets.only(top: 16),
@@ -218,9 +215,7 @@ class DailyView extends StatelessWidget {
                   ),
                 ),
               ),
-
             const SizedBox(height: 16),
-
             Stack(
               children: [
                 Container(
@@ -258,7 +253,6 @@ class DailyView extends StatelessWidget {
                   child: CustomPaint(
                     painter: _DashedRRectPainter(
                       color: isPositive ? colors.success : colors.error,
-                      radius: 16,
                     ),
                   ),
                 ),
@@ -280,39 +274,41 @@ class DailyView extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         color: colors.containerBG,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 4, color: accentColor),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                        color: colors.disabledText,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: accentColor),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          color: colors.disabledText,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      amount,
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: accentColor,
+                      const SizedBox(height: 6),
+                      Text(
+                        amount,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -323,7 +319,7 @@ class _DashedRRectPainter extends CustomPainter {
   final Color color;
   final double radius;
 
-  _DashedRRectPainter({required this.color, required this.radius});
+  _DashedRRectPainter({required this.color, this.radius = 16});
 
   @override
   void paint(Canvas canvas, Size size) {

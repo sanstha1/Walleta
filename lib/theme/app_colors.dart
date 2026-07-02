@@ -120,7 +120,7 @@ class AppColors {
   static AppColors light() {
     return AppColors(
       backgroundColor: const Color(0xFFB0C4DE),
-      primaryText: const Color(0xFF2D3142),
+      primaryText: const Color(0xFF000000),
       primary: const Color(0xFF6C63FF),
       primaryDark: const Color(0xFF5B54E8),
       primaryLight: const Color(0xFF8F87FF),
@@ -130,34 +130,34 @@ class AppColors {
       imageBackground: const Color(0xFFFFFFFF),
       onboardingBackground: const Color(0xFFF0F2FF),
       containerBG: const Color(0xFFFFFFFF),
-      tileBG: const Color(0xFFF5F6FA),
-      disabledText: const Color(0xFF9CA3AF),
-      barchartBG: const Color(0xFFEFF0F6),
-      transactionPage: const Color(0xFFF8F9FE),
-      containerBG2: const Color(0xFFE5E7EB),
-      secondaryBG: const Color(0xFFEEF0F8),
-      primaryGrey: const Color(0xFF6B7280),
-      secondaryGrey: const Color(0xFF374151),
-      success: const Color(0xFF4CAF50),
+      tileBG: const Color(0xFFE8EEF7),
+      disabledText: const Color(0xFF2D3142),
+      barchartBG: const Color(0xFFD4E1F0),
+      transactionPage: const Color(0xFFC5D5E8),
+      containerBG2: const Color(0xFF9FB3C8),
+      secondaryBG: const Color(0xFFD4E1F0),
+      primaryGrey: const Color(0xFF4A5568),
+      secondaryGrey: const Color(0xFF2D3142),
+      success: const Color(0xFF10B981),
       warning: const Color(0xFFFFA726),
-      error: const Color(0xFFEF4444),
+      error: const Color(0xFFBA1A1A),
       info: const Color(0xFF3B82F6),
-      disabled: const Color(0xFFD1D5DB),
+      disabled: const Color(0xFF9CA3AF),
       cardBackground: const Color(0xFFFFFFFF),
-      subtitleText: const Color(0xFF6B7280),
-      divider: const Color(0xFFE5E7EB),
-      inputFill: const Color(0xFFF5F5F5),
+      subtitleText: const Color(0xFF000000),
+      divider: const Color(0xFF9FB3C8),
+      inputFill: const Color(0xFFFFFFFF),
       lostColor: const Color(0xFFE53935),
       foundColor: const Color(0xFF43A047),
       claimedColor: const Color(0xFF9E9E9E),
-      navBackground: const Color(0xFF1A1F26),
+      navBackground: const Color(0xFF1A1A2E),
       navActiveIcon: const Color(0xFFFFFFFF),
-      navInactiveIcon: const Color(0xFF7C8186),
+      navInactiveIcon: const Color(0xFF9CA3AF),
       fabBackground: const Color(0xFF4ECDC4),
     );
   }
 
-  static AppColors data() => dark();
+  static AppColors data() => light();
 
   static AppColors of(BuildContext context) =>
       Provider.of<AppThemeManager>(context, listen: false).colors;

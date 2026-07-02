@@ -82,10 +82,12 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     await Provider.of<ProfileViewModel>(context, listen: false).loadUserData();
     Provider.of<NotificationViewModel>(
+      // ignore: use_build_context_synchronously
       context,
       listen: false,
     ).restartListening();
     Navigator.pushAndRemoveUntil(
+      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(builder: (_) => const BottomNavScreen()),
       (route) => false,
@@ -136,6 +138,7 @@ class _LoginPageState extends State<LoginPage> {
               final alreadyEnabled = await TokenService.isBiometricEnabled();
               if (!alreadyEnabled) {
                 final enable = await showDialog<bool>(
+                  // ignore: use_build_context_synchronously
                   context: context,
                   builder: (ctx) => AlertDialog(
                     shape: RoundedRectangleBorder(
