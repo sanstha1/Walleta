@@ -3,6 +3,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
 import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/screen/text_transaction/viewmodel/get_transaction_view_model.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
@@ -545,6 +546,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   if (result.success) {
                     await viewModel.getSyncedTransactions();
                   } else {
+                    // ignore: duplicate_ignore
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -582,6 +584,7 @@ class _TransactionPageState extends State<TransactionPage> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: (isIncome ? _incomeDeep : _expenseDeep)
+                            // ignore: duplicate_ignore
                             // ignore: deprecated_member_use
                             .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),

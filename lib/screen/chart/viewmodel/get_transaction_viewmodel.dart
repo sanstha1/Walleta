@@ -38,8 +38,9 @@ class TransactionModel {
           final ms = dateMap['\$date'] is String
               ? int.tryParse(dateMap['\$date'])
               : (dateMap['\$date'] as num?)?.toInt();
-          if (ms != null)
+          if (ms != null) {
             parseCreatedAt = DateTime.fromMillisecondsSinceEpoch(ms);
+          }
         }
       }
     }
