@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:walleta/firebase_options.dart';
+import 'package:walleta/screen/chart/viewmodel/get_transaction_viewmodel.dart';
 import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
 import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'package:walleta/screen/home/viewmodel/home_viewmodel.dart';
@@ -42,6 +43,7 @@ class WalletaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationViewModel()),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()),
         ChangeNotifierProvider(create: (_) => TransactionService()),
+        ChangeNotifierProvider(create: (_) => GetTransactionViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

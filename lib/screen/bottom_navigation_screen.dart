@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:walleta/screen/chart/view/chart_view.dart';
 import 'package:walleta/screen/home/view/homeview.dart';
+import 'package:walleta/screen/report/report_view.dart';
 import 'package:walleta/theme/app_colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -26,15 +27,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         children: [
           const HomeScreen(),
           const TransactionPage(),
-          Scaffold(
-            backgroundColor: colors.backgroundColor,
-            body: Center(
-              child: Text(
-                'Report',
-                style: TextStyle(color: colors.primaryText),
-              ),
-            ),
-          ),
+          const TransactionReportView(),
           Scaffold(
             backgroundColor: colors.backgroundColor,
             body: Center(
