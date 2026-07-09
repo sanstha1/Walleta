@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/screen/chart/view/chart_view.dart';
 import 'package:walleta/screen/home/view/homeview.dart';
 import 'package:walleta/theme/app_colors.dart';
 
@@ -24,12 +25,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         index: _currentIndex,
         children: [
           const HomeScreen(),
-          Scaffold(
-            backgroundColor: colors.backgroundColor,
-            body: Center(
-              child: Text('Chart', style: TextStyle(color: colors.primaryText)),
-            ),
-          ),
+          const TransactionPage(),
           Scaffold(
             backgroundColor: colors.backgroundColor,
             body: Center(

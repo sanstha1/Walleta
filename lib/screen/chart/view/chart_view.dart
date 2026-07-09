@@ -3,6 +3,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/screen/category/view/add_new_categories.dart';
 import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
 import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/screen/text_transaction/viewmodel/get_transaction_view_model.dart';

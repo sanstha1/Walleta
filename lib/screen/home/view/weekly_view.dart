@@ -268,7 +268,7 @@ class WeeklyView extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         SizedBox(
-          height: 150,
+          height: 165,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -280,22 +280,26 @@ class WeeklyView extends StatelessWidget {
               final value = isExpenseDominant ? expense : income;
               final barColor = isExpenseDominant ? _expenseDeep : _accentTeal;
               final barHeight = hasData
-                  ? (value / displayMax * 110).clamp(6.0, 110.0)
+                  ? (value / displayMax * 95).clamp(6.0, 95.0)
                   : 6.0;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (hasData)
-                    Text(
-                      "$currency${value.toInt()}",
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 9,
-                        color: colors.disabledText,
-                      ),
-                    ),
+                  SizedBox(
+                    height: 12,
+                    child: hasData
+                        ? Text(
+                            "$currency${value.toInt()}",
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 9,
+                              color: colors.disabledText,
+                            ),
+                          )
+                        : null,
+                  ),
                   const SizedBox(height: 4),
                   Container(
                     width: 18,
