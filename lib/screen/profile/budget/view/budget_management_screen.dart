@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:walleta/screen/category/view/add_new_categories.dart';
 import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
+import 'package:walleta/screen/profile/budget/viewmodel/budget_viewmodel.dart';
+import 'package:walleta/services/budget_service.dart';
 import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
@@ -937,7 +939,7 @@ class _BudgetManagementScreenState extends State<BudgetManagementScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedPeriod,
+                  initialValue: selectedPeriod,
                   dropdownColor: colors.containerBG,
                   decoration: InputDecoration(
                     labelText: 'Budget Period',
@@ -1287,6 +1289,7 @@ class _BudgetManagementScreenState extends State<BudgetManagementScreen> {
                 }
               } catch (e) {
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   _showError('Delete failed: ${e.toString()}');
                 }

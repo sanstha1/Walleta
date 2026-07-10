@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:walleta/screen/chart/view/chart_view.dart';
 import 'package:walleta/screen/home/view/homeview.dart';
+import 'package:walleta/screen/profile/view/profile_view.dart';
 import 'package:walleta/screen/report/report_view.dart';
 import 'package:walleta/theme/app_colors.dart';
 
@@ -28,15 +29,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
           const HomeScreen(),
           const TransactionPage(),
           const TransactionReportView(),
-          Scaffold(
-            backgroundColor: colors.backgroundColor,
-            body: Center(
-              child: Text(
-                'Account',
-                style: TextStyle(color: colors.primaryText),
-              ),
-            ),
-          ),
+          const AccountView(),
         ],
       ),
       floatingActionButton: _VoiceButton(onTap: _onVoiceTap),

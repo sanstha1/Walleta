@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/services/budget_service.dart';
 import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
 
@@ -49,7 +50,7 @@ class BudgetSummaryWidget extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 12),
                       child: _buildBudgetChip(budget, colors),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -71,6 +72,7 @@ class BudgetSummaryWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: statusColor.withOpacity(0.1),
         border: Border.all(color: statusColor),
         borderRadius: BorderRadius.circular(12),

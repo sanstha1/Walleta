@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:walleta/config/api_config.dart';
 import 'package:walleta/screen/authentication/login_page.dart';
 import 'package:walleta/screen/chart/viewmodel/get_transaction_viewmodel.dart';
+import 'package:walleta/screen/profile/budget/view/budget_management_screen.dart';
 import 'package:walleta/screen/profile/view/notification_view.dart';
 import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'dart:convert';

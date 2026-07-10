@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/services/budget_service.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
@@ -163,8 +164,10 @@ class BudgetCheckDialog extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
+                        // ignore: deprecated_member_use
                         color: _expenseDeep.withOpacity(0.1),
                         border: Border.all(
+                          // ignore: deprecated_member_use
                           color: _expenseDeep.withOpacity(0.5),
                         ),
                         borderRadius: BorderRadius.circular(12),
