@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/screen/profile/budget/viewmodel/budget_viewmodel.dart';
 import 'package:walleta/services/currency_service.dart';
-import 'package:walleta/theme/app_theme_manager.dart';
 
 const Color _expenseDeep = Color(0xFFBA1A1A);
 

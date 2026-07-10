@@ -9,7 +9,7 @@ const Color _expenseDeep = Color(0xFFBA1A1A);
 class BudgetSummaryWidget extends StatelessWidget {
   final String email;
 
-  const BudgetSummaryWidget({Key? key, required this.email}) : super(key: key);
+  const BudgetSummaryWidget({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {
