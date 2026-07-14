@@ -4,7 +4,7 @@ import 'package:walleta/screen/home/view/daily_view.dart';
 import 'package:walleta/screen/home/view/monthly_view.dart';
 import 'package:walleta/screen/home/view/weekly_view.dart';
 import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
-import 'package:walleta/theme/app_colors.dart';
+import 'package:walleta/theme/app_theme_manager.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
 
@@ -32,8 +32,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
+    final themeManager = context.watch<AppThemeManager>();
+    final colors = themeManager.colors;
     final name = Provider.of<ProfileViewModel>(context).name;
 
     return Scaffold(
@@ -48,8 +48,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: Colors.white,
-                    child: const Icon(Icons.person, color: Color(0xFF1C3343)),
+                    backgroundColor: colors.containerBG,
+                    child: Icon(Icons.person, color: colors.primaryText),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

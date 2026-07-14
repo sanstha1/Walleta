@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:walleta/screen/chart/viewmodel/get_transaction_viewmodel.dart';
 import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/theme/app_colors.dart';
+import 'package:walleta/theme/app_theme_manager.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
 
@@ -181,7 +182,8 @@ class _TransactionReportViewState extends State<TransactionReportView>
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
+    final themeManager = context.watch<AppThemeManager>();
+    final colors = themeManager.colors;
     final currency = context.watch<CurrencyProvider>().symbol;
 
     return Scaffold(
