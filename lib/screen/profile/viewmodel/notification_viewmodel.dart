@@ -42,6 +42,7 @@ class NotificationViewModel extends ChangeNotifier {
 
   List<NotificationItem> _items = [];
   bool _isLoading = true;
+  bool _hasStartedListening = false;
 
   List<NotificationItem> get items => _items;
   bool get isLoading => _isLoading;
@@ -65,6 +66,9 @@ class NotificationViewModel extends ChangeNotifier {
   }
 
   void startListening() {
+    if (_hasStartedListening) return;
+    _hasStartedListening = true;
+
     _sub?.cancel();
 
     final col = _col;
@@ -73,7 +77,9 @@ class NotificationViewModel extends ChangeNotifier {
         '⚠️ NotificationViewModel: no Firebase user — skipping listener',
       );
       _isLoading = false;
-      notifyListeners();
+      if (_hasNotifiedInitialLoad) {
+        notifyListeners();
+      }
       return;
     }
 
@@ -98,9 +104,12 @@ class NotificationViewModel extends ChangeNotifier {
         );
   }
 
+  bool get _hasNotifiedInitialLoad => !_isLoading || _items.isNotEmpty;
+
   void restartListening() {
     stopListening();
     _isLoading = true;
+    _hasStartedListening = false;
     startListening();
   }
 
@@ -146,6 +155,7 @@ class NotificationViewModel extends ChangeNotifier {
   void stopListening() {
     _sub?.cancel();
     _sub = null;
+    _hasStartedListening = false;
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'package:walleta/theme/app_colors.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
 const Color _expenseDeep = Color(0xFFBA1A1A);
@@ -16,13 +17,38 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
+  late NotificationViewModel _viewModel;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _viewModel = context.read<NotificationViewModel>();
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      // ignore: use_build_context_synchronously
-      () => context.read<NotificationViewModel>().markAllRead(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          _viewModel.startListening();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              _viewModel.markAllRead();
+            }
+          });
+        } else {
+          debugPrint('⚠️ No authenticated user found');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _viewModel.stopListening();
+    super.dispose();
   }
 
   @override
@@ -31,6 +57,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final themeManager = context.watch<AppThemeManager>();
     final colors = themeManager.colors;
     final isDark = themeManager.isDark;
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        backgroundColor: colors.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: colors.backgroundColor,
+          elevation: 0,
+          title: Text(
+            'Notifications',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'monospace',
+              color: colors.primaryText,
+            ),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 80,
+                color: colors.disabledText.withOpacity(0.3),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Authentication Required',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: colors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please log in to view notifications',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 14,
+                  color: colors.disabledText,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: colors.backgroundColor,
@@ -71,7 +148,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           : RefreshIndicator(
               color: _accentTeal,
               onRefresh: () async {
-                await Future.delayed(const Duration(milliseconds: 500));
+                vm.restartListening();
+                await Future.delayed(const Duration(milliseconds: 800));
               },
               child: ListView(
                 padding: const EdgeInsets.all(16),
@@ -104,7 +182,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Icon(
             Icons.notifications_none_rounded,
             size: 80,
-            // ignore: deprecated_member_use
             color: colors.disabledText.withOpacity(0.2),
           ),
           const SizedBox(height: 16),
@@ -194,10 +271,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ),
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
-      onDismissed: (_) =>
-          context.read<NotificationViewModel>().deleteNotification(n.id),
+      onDismissed: (_) => _viewModel.deleteNotification(n.id),
       child: GestureDetector(
-        onTap: () => context.read<NotificationViewModel>().markRead(n.id),
+        onTap: () => _viewModel.markRead(n.id),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.only(bottom: 10),
