@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:walleta/screen/home/view/daily_view.dart';
 import 'package:walleta/screen/home/view/monthly_view.dart';
 import 'package:walleta/screen/home/view/weekly_view.dart';
+import 'package:walleta/screen/profile/view/notification_view.dart';
 import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
 
@@ -34,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final themeManager = context.watch<AppThemeManager>();
     final colors = themeManager.colors;
-    final name = Provider.of<ProfileViewModel>(context).name;
+
+    final profileVm = context.watch<ProfileViewModel>();
+    final name = profileVm.name;
 
     return Scaffold(
       backgroundColor: colors.backgroundColor,
@@ -46,10 +49,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: colors.containerBG,
-                    child: Icon(Icons.person, color: colors.primaryText),
+                  Consumer<ProfileViewModel>(
+                    builder: (context, vm, _) {
+                      final imageUrl = vm.profileImage;
+                      final bool hasValidImage =
+                          imageUrl.isNotEmpty &&
+                          (imageUrl.startsWith('http') ||
+                              imageUrl.startsWith('https'));
+
+                      return CircleAvatar(
+                        radius: 24,
+                        backgroundColor: colors.containerBG,
+                        backgroundImage: hasValidImage
+                            ? NetworkImage(imageUrl)
+                            : null,
+                        child: !hasValidImage
+                            ? Icon(Icons.person, color: colors.primaryText)
+                            : null,
+                      );
+                    },
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -77,7 +95,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ],
                     ),
                   ),
-                  Icon(Icons.notifications_none, color: _accentTeal, size: 26),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      Icons.notifications_none,
+                      color: _accentTeal,
+                      size: 26,
+                    ),
+                  ),
                 ],
               ),
             ),

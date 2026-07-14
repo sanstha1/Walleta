@@ -1,13 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:walleta/screen/category/view/add_new_categories.dart';
 import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
-import 'package:walleta/theme/app_colors.dart';
+import 'package:walleta/screen/profile/view/notification_view.dart';
 import 'package:walleta/screen/text_transaction/viewmodel/get_transaction_view_model.dart';
-import 'package:walleta/theme/app_theme_manager.dart';
 import 'package:walleta/services/currency_service.dart';
-import 'dart:math' as math;
+import 'package:walleta/theme/app_colors.dart';
+import 'package:walleta/theme/app_theme_manager.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
 const Color _expenseDeep = Color(0xFFBA1A1A);
@@ -93,10 +95,20 @@ class _TransactionPageState extends State<TransactionPage> {
                       actions: [
                         Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Icon(
-                            Icons.notifications_none_rounded,
-                            color: colors.primaryText,
-                            size: 24,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const NotificationScreen(),
+                                ),
+                              );
+                            },
+                            child: Icon(
+                              Icons.notifications_none_rounded,
+                              color: colors.primaryText,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ],
