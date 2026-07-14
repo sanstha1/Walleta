@@ -32,6 +32,7 @@ dependencies:
   timeago: ^3.7.1
   image_picker: ^1.2.3
   dio: ^5.10.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -44,3 +45,27 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+# ── App Icon Config ───────────────────────────────────────────────────────────
+flutter_launcher_icons:
+  android: 'launcher_icon'
+  ios: 'app_icon'
+  image_path: "assets/icons/logo.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  adaptive_icon_foreground: "assets/icons/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_round: "assets/icons/logo.png"
+
+  # ── Web (optional) ────────────────────────────────────────────────────────
+  web:
+    generate: true
+    image_path: "assets/icons/logo.png"
+    background_color: "##FFFFFF"
+    theme_color: "##FFFFFF"
+
+  # ── Windows (optional) ────────────────────────────────────────────────────
+  windows:
+    generate: true
+    image_path: "assets/icons/logo.png"
+    icon_size: 48Y
