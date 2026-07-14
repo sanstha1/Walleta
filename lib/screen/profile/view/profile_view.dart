@@ -296,47 +296,71 @@ class _AccountViewState extends State<AccountView> {
       body: vm.isLoading
           ? Center(child: CircularProgressIndicator(color: _accentTeal))
           : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 40),
               child: Column(
                 children: [
-                  const SizedBox(height: 60),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.containerBG,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildProfileHeader(vm, colors, isDark),
-                        const SizedBox(height: 25),
-                        _buildMenuSection(
-                          context,
-                          vm,
-                          colors,
-                          themeManager,
-                          isDark,
-                        ),
-                        const SizedBox(height: 30),
-                        _buildLogoutButton(context, vm, colors),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 100),
+                  _buildProfileHeader(vm, colors, isDark),
+                  const SizedBox(height: 32),
+                  _buildMenuSection(context, vm, colors, themeManager, isDark),
+                  const SizedBox(height: 30),
+                  _buildLogoutButton(context, vm, colors),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
     );
   }
 
-  ImageProvider _profileImageProvider(String url) {
-    if (url.startsWith('http') || url.startsWith('https')) {
-      return NetworkImage(url);
-    }
-    return const AssetImage('assets/images/logo.png');
+  Widget _avatar(String url, double size) {
+    final hasImage = url.startsWith('http') || url.startsWith('https');
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: hasImage
+            ? Image.network(
+                url,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _defaultAvatarIcon(size),
+              )
+            : _defaultAvatarIcon(size),
+      ),
+    );
+  }
+
+  Widget _defaultAvatarIcon(double size) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        SizedBox(height: size * 0.18),
+        Container(
+          width: size * 0.36,
+          height: size * 0.36,
+          decoration: const BoxDecoration(
+            color: Color(0xFF16213E),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: size * 0.74,
+          height: size * 0.42,
+          decoration: BoxDecoration(
+            color: const Color(0xFF4A6FA5),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(size * 0.36),
+              topRight: Radius.circular(size * 0.36),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildProfileHeader(
@@ -348,11 +372,7 @@ class _AccountViewState extends State<AccountView> {
       children: [
         Stack(
           children: [
-            CircleAvatar(
-              radius: 55,
-              backgroundColor: colors.disabledText.withOpacity(0.1),
-              backgroundImage: _profileImageProvider(vm.profileImage),
-            ),
+            _avatar(vm.profileImage, 110),
             Positioned(
               bottom: 0,
               right: 0,
@@ -361,11 +381,11 @@ class _AccountViewState extends State<AccountView> {
                     ? null
                     : () => _showImagePickerSheet(colors, isDark),
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
                     color: _accentTeal,
                     shape: BoxShape.circle,
-                    border: Border.all(color: colors.containerBG, width: 2),
+                    border: Border.all(color: colors.backgroundColor, width: 2),
                   ),
                   child: _isUploading
                       ? const SizedBox(
@@ -382,13 +402,13 @@ class _AccountViewState extends State<AccountView> {
             ),
           ],
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 16),
         Text(
           'Hey, ${vm.name}!',
           style: TextStyle(
             fontFamily: 'monospace',
             color: colors.primaryText,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -475,15 +495,7 @@ class _AccountViewState extends State<AccountView> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      Center(
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: colors.disabledText.withOpacity(0.1),
-                          backgroundImage: _profileImageProvider(
-                            vm.profileImage,
-                          ),
-                        ),
-                      ),
+                      Center(child: _avatar(vm.profileImage, 80)),
                       const SizedBox(height: 24),
                       _inputField(
                         controller: nameController,
@@ -675,13 +687,13 @@ class _AccountViewState extends State<AccountView> {
             _showEditProfileSheet(context, vm, colors, isDark);
           },
         ),
-        _menuItem(Icons.currency_exchange, "Currency", Colors.teal, colors, () {
+        _menuItem(Icons.currency_exchange, "Currency", _accentTeal, colors, () {
           _showCurrencySheet(context, colors, isDark);
         }),
         _menuItem(
           Icons.savings_outlined,
           "Budget Limits",
-          Colors.green,
+          _accentTeal,
           colors,
           () {
             Navigator.push(
@@ -695,7 +707,7 @@ class _AccountViewState extends State<AccountView> {
         _menuItem(
           Icons.download_outlined,
           "Export Data",
-          Colors.purple,
+          _accentTeal,
           colors,
           () {
             Navigator.push(
@@ -714,7 +726,7 @@ class _AccountViewState extends State<AccountView> {
             ),
             leading: const Icon(
               Icons.notifications_active_outlined,
-              color: Colors.orange,
+              color: _accentTeal,
             ),
             title: Text(
               "Notifications",
@@ -758,11 +770,18 @@ class _AccountViewState extends State<AccountView> {
             contentPadding: EdgeInsets.zero,
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Divider(
+            color: colors.disabledText.withOpacity(0.15),
+            height: 1,
+          ),
+        ),
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Icon(
             isDark ? Icons.dark_mode : Icons.light_mode,
-            color: Colors.cyan,
+            color: _accentTeal,
           ),
           title: Text(
             "Theme",
@@ -795,7 +814,7 @@ class _AccountViewState extends State<AccountView> {
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.light_mode, color: Colors.amber),
+          leading: const Icon(Icons.light_mode, color: _accentTeal),
           title: Text(
             "Auto Light Mode",
             style: TextStyle(
@@ -860,7 +879,7 @@ class _AccountViewState extends State<AccountView> {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _expenseDeep.withOpacity(0.1),
+          backgroundColor: colors.containerBG,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -868,14 +887,21 @@ class _AccountViewState extends State<AccountView> {
           elevation: 0,
         ),
         onPressed: () => _confirmLogout(context, vm, colors),
-        child: Text(
-          "Logout",
-          style: TextStyle(
-            fontFamily: 'monospace',
-            color: _expenseDeep,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.logout, color: _expenseDeep, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              "Logout",
+              style: TextStyle(
+                fontFamily: 'monospace',
+                color: _expenseDeep,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1015,7 +1041,7 @@ class _AccountViewState extends State<AccountView> {
           ),
         ),
         content: Text(
-          "Confirm logout from Spensr?",
+          "Confirm logout from Walleta?",
           style: TextStyle(fontFamily: 'monospace', color: colors.disabledText),
         ),
         actions: [

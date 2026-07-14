@@ -8,6 +8,7 @@ import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
 import 'package:walleta/screen/profile/viewmodel/notification_viewmodel.dart';
 import 'package:walleta/screen/home/viewmodel/home_viewmodel.dart';
 import 'package:walleta/screen/splash/splash_view.dart';
+import 'package:walleta/services/budget_service.dart';
 import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/services/transaction_service.dart';
 import 'package:walleta/theme/app_theme_manager.dart';
@@ -44,6 +45,7 @@ class WalletaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CurrencyProvider()),
         ChangeNotifierProvider(create: (_) => TransactionService()),
         ChangeNotifierProvider(create: (_) => GetTransactionViewModel()),
+        ChangeNotifierProvider(create: (_) => BudgetService()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
