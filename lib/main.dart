@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:walleta/config/api_config.dart';
 import 'package:walleta/firebase_options.dart';
 import 'package:walleta/screen/chart/viewmodel/get_transaction_viewmodel.dart';
 import 'package:walleta/screen/profile/viewmodel/profile_viewmodel.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
 
+  await ApiConfig.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const WalletaApp());
