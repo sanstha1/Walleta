@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:permission_handler/permission_handler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:walleta/config/api_config.dart';
 import 'package:walleta/services/token_service.dart';
 import 'package:walleta/theme/app_colors.dart';
+import 'package:path_provider/path_provider.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
 
@@ -74,59 +74,28 @@ class _ExportScreenState extends State<ExportScreen>
     return null;
   }
 
-  Future<int> _getAndroidSdkInt() async {
-    try {
-      final deviceInfo = DeviceInfoPlugin();
-      final android = await deviceInfo.androidInfo;
-      return android.version.sdkInt;
-    } catch (_) {
-      return 30;
-    }
-  }
-
-  Future<bool> _requestStoragePermission() async {
-    final sdk = await _getAndroidSdkInt();
-    if (sdk >= 30) {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        if (mounted) await openAppSettings();
-        return false;
-      }
-      return true;
-    } else if (sdk >= 29) {
-      return true;
-    } else {
-      final status = await Permission.storage.request();
-      return status.isGranted;
-    }
-  }
-
   Future<void> _saveToDownloads(List<int> bytes, String filename) async {
-    if (Platform.isAndroid) {
-      final granted = await _requestStoragePermission();
-      if (!granted) {
-        setState(() {
-          _status = _ExportStatus.error;
-          _errorMessage = 'Storage permission denied.';
-        });
-        return;
-      }
-    }
-
-    final downloadsDir = Directory('/storage/emulated/0/Download');
-    if (!await downloadsDir.exists()) {
-      await downloadsDir.create(recursive: true);
-    }
-
-    final file = File('${downloadsDir.path}/$filename');
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/$filename');
     await file.writeAsBytes(bytes);
 
+    final result = await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], text: 'Your transaction export'),
+    );
+
     if (!mounted) return;
-    setState(() {
-      _status = _ExportStatus.success;
-      _savedFilename = filename;
-    });
-    _successController.forward(from: 0);
+
+    if (result.status == ShareResultStatus.success) {
+      setState(() {
+        _status = _ExportStatus.success;
+        _savedFilename = filename;
+      });
+      _successController.forward(from: 0);
+    } else {
+      setState(() {
+        _status = _ExportStatus.idle;
+      });
+    }
   }
 
   Future<void> _exportTransactions() async {
