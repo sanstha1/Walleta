@@ -1,12 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:walleta/screen/chart/viewmodel/get_transaction_viewmodel.dart';
-import 'dart:io';
-
 import 'package:walleta/services/currency_service.dart';
 import 'package:walleta/theme/app_colors.dart';
 
@@ -40,22 +39,66 @@ class _TransactionReportViewState extends State<TransactionReportView>
   }
 
   Color _getCategoryColor(String category) {
-    switch (category.toLowerCase().trim()) {
-      case 'education':
-        return const Color(0xFF43A047);
-      case 'food':
-        return const Color(0xFF1E88E5);
-      case 'work':
-        return const Color(0xFF5E35B1);
-      case 'shopping':
-        return const Color(0xFFE91E63);
-      case 'health':
-        return const Color(0xFFF44336);
-      case 'transport':
-        return Colors.orangeAccent;
-      default:
-        return const Color(0xFFFB8C00);
+    final lowerCat = category.toLowerCase().trim();
+
+    if (lowerCat.contains('food') ||
+        lowerCat.contains('grocery') ||
+        lowerCat.contains('restaurant')) {
+      return const Color(0xFF1E88E5);
     }
+    if (lowerCat.contains('transport') ||
+        lowerCat.contains('travel') ||
+        lowerCat.contains('fuel')) {
+      return const Color(0xFFFF9800);
+    }
+    if (lowerCat.contains('shopping') || lowerCat.contains('clothing')) {
+      return const Color(0xFFE91E63);
+    }
+    if (lowerCat.contains('health') || lowerCat.contains('medical')) {
+      return const Color(0xFFF44336);
+    }
+    if (lowerCat.contains('education') || lowerCat.contains('school')) {
+      return const Color(0xFF43A047);
+    }
+    if (lowerCat.contains('work') ||
+        lowerCat.contains('salary') ||
+        lowerCat.contains('income')) {
+      return const Color(0xFF5E35B1);
+    }
+    if (lowerCat.contains('entertainment') ||
+        lowerCat.contains('movie') ||
+        lowerCat.contains('game')) {
+      return const Color(0xFF00BCD4);
+    }
+    if (lowerCat.contains('bill') ||
+        lowerCat.contains('utility') ||
+        lowerCat.contains('rent')) {
+      return const Color(0xFF795548);
+    }
+
+    final List<Color> vibrantColors = const [
+      Color(0xFFE53935),
+      Color(0xFFD81B60),
+      Color(0xFF8E24AA),
+      Color(0xFF5E35B1),
+      Color(0xFF3949AB),
+      Color(0xFF1E88E5),
+      Color(0xFF039BE5),
+      Color(0xFF00ACC1),
+      Color(0xFF00897B),
+      Color(0xFF43A047),
+      Color(0xFF7CB342),
+      Color(0xFFC0CA33),
+      Color(0xFFFDD835),
+      Color(0xFFFFB300),
+      Color(0xFFFF9800),
+      Color(0xFFFB8C00),
+      Color(0xFF8D6E63),
+      Color(0xFF78909C),
+    ];
+
+    int index = lowerCat.hashCode.abs() % vibrantColors.length;
+    return vibrantColors[index];
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
@@ -76,52 +119,6 @@ class _TransactionReportViewState extends State<TransactionReportView>
     }
   }
 
-  Future<int> _getAndroidSdkInt() async {
-    try {
-      final deviceInfo = DeviceInfoPlugin();
-      final android = await deviceInfo.androidInfo;
-      return android.version.sdkInt;
-    } catch (_) {
-      return 30;
-    }
-  }
-
-  Future<bool> _requestStoragePermission() async {
-    final sdk = await _getAndroidSdkInt();
-
-    if (sdk >= 30) {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        if (!mounted) return false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Please allow "All files access" in Settings.'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 5),
-          ),
-        );
-        await openAppSettings();
-        return false;
-      }
-      return true;
-    } else if (sdk >= 29) {
-      return true;
-    } else {
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        if (!mounted) return false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Storage permission denied.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return false;
-      }
-      return true;
-    }
-  }
-
   Future<void> _exportFilteredToCsv(List<dynamic> filteredList) async {
     if (filteredList.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -135,11 +132,6 @@ class _TransactionReportViewState extends State<TransactionReportView>
 
     setState(() => _isExporting = true);
     try {
-      if (Platform.isAndroid) {
-        final granted = await _requestStoragePermission();
-        if (!granted) return;
-      }
-
       final buffer = StringBuffer();
       buffer.writeln('Date,Title,Category,Amount,Type');
       for (final t in filteredList) {
@@ -153,24 +145,27 @@ class _TransactionReportViewState extends State<TransactionReportView>
         buffer.writeln('$date,$title,$category,$amount,$type');
       }
 
-      final downloadsDir = Directory('/storage/emulated/0/Download');
-      if (!await downloadsDir.exists()) {
-        await downloadsDir.create(recursive: true);
-      }
-
       final filename =
           'report-${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv';
-      final file = File('${downloadsDir.path}/$filename');
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/$filename');
       await file.writeAsString(buffer.toString());
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ Saved to Downloads/$filename'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 5),
-        ),
+      final result = await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: 'Your transaction report'),
       );
+
+      if (!mounted) return;
+
+      if (result.status == ShareResultStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Saved $filename'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -195,6 +190,7 @@ class _TransactionReportViewState extends State<TransactionReportView>
         child: Consumer<GetTransactionViewModel>(
           builder: (context, viewModel, child) {
             final filteredList = viewModel.transactions.where((t) {
+              if (t.createdAt == null) return false;
               final tDate = DateTime(
                 t.createdAt!.year,
                 t.createdAt!.month,
@@ -206,21 +202,23 @@ class _TransactionReportViewState extends State<TransactionReportView>
                 startDate.day,
               );
               final eDate = DateTime(endDate.year, endDate.month, endDate.day);
+
               final matchesDate =
                   tDate.isAtSameMomentAs(sDate) ||
                   tDate.isAtSameMomentAs(eDate) ||
                   (tDate.isAfter(sDate) && tDate.isBefore(eDate));
+
               if (!matchesDate) return false;
               if (selectedFilter == "All") return true;
-              return (selectedFilter == "Income"
-                  ? (t.isIncome ?? false)
-                  : !(t.isIncome ?? false));
+              if (selectedFilter == "Income") return (t.isIncome ?? false);
+              return !(t.isIncome ?? false);
             }).toList();
 
             Map<String, double> categoryData = {};
             double totalInTab = 0;
             double incomeInTab = 0;
             double expenseInTab = 0;
+
             for (var t in filteredList) {
               double amount = t.amount ?? 0.0;
               totalInTab += amount;
@@ -299,7 +297,6 @@ class _TransactionReportViewState extends State<TransactionReportView>
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          // ignore: deprecated_member_use
                           color: colors.disabled.withOpacity(0.4),
                         ),
                       ),
@@ -326,12 +323,14 @@ class _TransactionReportViewState extends State<TransactionReportView>
                           colors,
                           currency,
                           balance,
+                          viewModel,
                         ),
                         _buildCategoryChart(
                           categoryData,
                           totalInTab,
                           colors,
                           currency,
+                          viewModel,
                         ),
                       ],
                     ),
@@ -366,7 +365,7 @@ class _TransactionReportViewState extends State<TransactionReportView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'This Month',
+                'Selected Period',
                 style: TextStyle(color: colors.disabledText, fontSize: 12),
               ),
               const SizedBox(height: 4),
@@ -384,14 +383,14 @@ class _TransactionReportViewState extends State<TransactionReportView>
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Balance',
+                'Net Balance',
                 style: TextStyle(color: colors.disabledText, fontSize: 12),
               ),
               const SizedBox(height: 4),
               Text(
                 '${balance >= 0 ? '+' : '-'}$currency${balance.abs().toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: _accentTeal,
+                style: TextStyle(
+                  color: balance >= 0 ? colors.success : colors.error,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -408,72 +407,97 @@ class _TransactionReportViewState extends State<TransactionReportView>
     AppColors colors,
     String currency,
     double balance,
+    GetTransactionViewModel viewModel,
   ) {
     if (list.isEmpty) {
-      return Center(
-        child: Text(
-          "No records found",
-          style: TextStyle(color: colors.disabledText),
+      String emptyMessage = "No records found for this period.";
+      if (selectedFilter == "Income") {
+        emptyMessage = "No income records found.";
+      } else if (selectedFilter == "Expense") {
+        emptyMessage = "No expense records found.";
+      }
+      return RefreshIndicator(
+        onRefresh: () => viewModel.getSyncedTransactions(),
+        color: _accentTeal,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: 300,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    emptyMessage,
+                    style: TextStyle(color: colors.disabledText, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: list.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return _buildSummaryCard(list.length, balance, colors, currency);
-        }
-        final t = list[index - 1];
-        final isIncome = t.isIncome ?? false;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: colors.containerBG,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: AppColors.softShadow,
-          ),
-          child: Row(
-            children: [
-              _getCategoryEmoji(
-                t.category ?? "General",
-                _getCategoryColor(t.category ?? "General"),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.title ?? "Untitled",
-                      style: TextStyle(
-                        color: colors.primaryText,
-                        fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: () => viewModel.getSyncedTransactions(),
+      color: _accentTeal,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: list.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return _buildSummaryCard(list.length, balance, colors, currency);
+          }
+          final t = list[index - 1];
+          final isIncome = t.isIncome ?? false;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colors.containerBG,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.softShadow,
+            ),
+            child: Row(
+              children: [
+                _getCategoryEmoji(t.emoji, t.category ?? "General"),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.title ?? "Untitled",
+                        style: TextStyle(
+                          color: colors.primaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${DateFormat('MMM dd, hh:mm a').format(t.createdAt ?? DateTime.now())}  ·  ${(t.category ?? 'GENERAL').toUpperCase()}',
-                      style: TextStyle(
-                        color: colors.disabledText,
-                        fontSize: 11,
+                      const SizedBox(height: 2),
+                      Text(
+                        '${DateFormat('MMM dd, hh:mm a').format(t.createdAt ?? DateTime.now())}  ·  ${(t.category ?? 'GENERAL').toUpperCase()}',
+                        style: TextStyle(
+                          color: colors.disabledText,
+                          fontSize: 11,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                "${isIncome ? '+' : '-'}$currency${(t.amount ?? 0.0).toStringAsFixed(2)}",
-                style: TextStyle(
-                  color: isIncome ? colors.success : colors.error,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  "${isIncome ? '+' : '-'}$currency${(t.amount ?? 0.0).toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: isIncome ? colors.success : colors.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -482,77 +506,176 @@ class _TransactionReportViewState extends State<TransactionReportView>
     double total,
     AppColors colors,
     String currency,
+    GetTransactionViewModel viewModel,
   ) {
     if (data.isEmpty) {
-      return Center(
-        child: Text(
-          "No data to visualize",
-          style: TextStyle(color: colors.disabledText),
+      String emptyMessage = "No data to visualize.";
+      if (selectedFilter == "Income") {
+        emptyMessage = "No income records found for this period.";
+      } else if (selectedFilter == "Expense") {
+        emptyMessage = "No expense records found for this period.";
+      }
+      return RefreshIndicator(
+        onRefresh: () => viewModel.getSyncedTransactions(),
+        color: _accentTeal,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: 300,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    emptyMessage,
+                    style: TextStyle(color: colors.disabledText, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 180,
-          child: PieChart(
-            PieChartData(
-              sectionsSpace: 4,
-              centerSpaceRadius: 40,
-              sections: data.entries
-                  .map(
-                    (e) => PieChartSectionData(
-                      color: _getCategoryColor(e.key),
-                      value: e.value,
-                      radius: 20,
-                      showTitle: false,
+
+    String chartTitle = "Transaction Breakdown";
+    Color titleColor = _accentTeal;
+    if (selectedFilter == "Expense") {
+      chartTitle = "Expense Breakdown";
+      titleColor = colors.error;
+    } else if (selectedFilter == "Income") {
+      chartTitle = "Income Breakdown";
+      titleColor = colors.success;
+    }
+
+    final entries = data.entries.toList();
+
+    return RefreshIndicator(
+      onRefresh: () => viewModel.getSyncedTransactions(),
+      color: _accentTeal,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Text(
+                  chartTitle,
+                  style: TextStyle(
+                    color: titleColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Total: $currency${total.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: colors.disabledText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 200,
+                  child: PieChart(
+                    PieChartData(
+                      sectionsSpace: 4,
+                      centerSpaceRadius: 45,
+                      sections: entries
+                          .map(
+                            (e) => PieChartSectionData(
+                              color: _getCategoryColor(e.key),
+                              value: e.value,
+                              radius: 25,
+                              showTitle: true,
+                              title:
+                                  "${(e.value / total * 100).toStringAsFixed(0)}%",
+                              titleStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
-                  )
-                  .toList(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 20),
-        Expanded(
-          child: ListView(
-            children: data.entries
-                .map(
-                  (e) => _ReportCategoryRow(
-                    label: e.key,
-                    amount: "$currency${e.value.toStringAsFixed(2)}",
-                    percent: "${(e.value / total * 100).toStringAsFixed(1)}%",
-                    color: _getCategoryColor(e.key),
-                    textColor: colors.primaryText,
-                    subColor: colors.disabledText,
-                  ),
-                )
-                .toList(),
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final e = entries[index];
+              return _ReportCategoryRow(
+                label: e.key,
+                amount: "$currency${e.value.toStringAsFixed(2)}",
+                percent: "${(e.value / total * 100).toStringAsFixed(1)}%",
+                color: _getCategoryColor(e.key),
+                textColor: colors.primaryText,
+                subColor: colors.disabledText,
+              );
+            }, childCount: entries.length),
           ),
-        ),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
+      ),
     );
   }
 
-  Widget _getCategoryEmoji(String name, Color color) {
-    String emoji = "💰";
-    if (name.toLowerCase().contains('food')) {
-      emoji = "🍕";
-    } else if (name.toLowerCase().contains('transport')) {
-      emoji = "🚗";
-    } else if (name.toLowerCase().contains('shopping')) {
-      emoji = "🛍️";
+  Widget _getCategoryEmoji(String? emoji, String category) {
+    final color = _getCategoryColor(category);
+    String displayEmoji = "💰";
+
+    if (emoji != null && emoji.isNotEmpty && emoji != "null") {
+      displayEmoji = emoji;
+    } else {
+      final lowerCat = category.toLowerCase();
+      if (lowerCat.contains('food') ||
+          lowerCat.contains('grocery') ||
+          lowerCat.contains('restaurant')) {
+        displayEmoji = "🍕";
+      } else if (lowerCat.contains('transport') ||
+          lowerCat.contains('travel') ||
+          lowerCat.contains('fuel')) {
+        displayEmoji = "🚗";
+      } else if (lowerCat.contains('shopping') ||
+          lowerCat.contains('clothing')) {
+        displayEmoji = "🛍️";
+      } else if (lowerCat.contains('health') || lowerCat.contains('medical')) {
+        displayEmoji = "🏥";
+      } else if (lowerCat.contains('education') ||
+          lowerCat.contains('school')) {
+        displayEmoji = "📚";
+      } else if (lowerCat.contains('work') ||
+          lowerCat.contains('salary') ||
+          lowerCat.contains('income')) {
+        displayEmoji = "💼";
+      } else if (lowerCat.contains('entertainment') ||
+          lowerCat.contains('movie') ||
+          lowerCat.contains('game')) {
+        displayEmoji = "🎬";
+      } else if (lowerCat.contains('bill') ||
+          lowerCat.contains('utility') ||
+          lowerCat.contains('rent')) {
+        displayEmoji = "🧾";
+      }
     }
+
     return Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
-      child: Text(emoji, style: const TextStyle(fontSize: 20)),
+      child: Text(displayEmoji, style: const TextStyle(fontSize: 20)),
     );
   }
 
@@ -562,19 +685,31 @@ class _TransactionReportViewState extends State<TransactionReportView>
         final isSelected = selectedFilter == type;
         return GestureDetector(
           onTap: () => setState(() => selectedFilter = type),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             margin: const EdgeInsets.only(right: 10),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
             decoration: BoxDecoration(
               color: isSelected ? _accentTeal : colors.containerBG,
               borderRadius: BorderRadius.circular(30),
-              boxShadow: isSelected ? [] : AppColors.softShadow,
+              border: isSelected
+                  ? null
+                  : Border.all(color: colors.disabled.withOpacity(0.2)),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: _accentTeal.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : AppColors.softShadow,
             ),
             child: Text(
               type,
               style: TextStyle(
                 color: isSelected ? Colors.white : colors.disabledText,
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
             ),
