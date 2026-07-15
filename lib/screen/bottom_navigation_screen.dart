@@ -3,6 +3,7 @@ import 'package:walleta/screen/chart/view/chart_view.dart';
 import 'package:walleta/screen/home/view/homeview.dart';
 import 'package:walleta/screen/profile/view/profile_view.dart';
 import 'package:walleta/screen/report/report_view.dart';
+import 'package:walleta/screen/voice/view/voice_view.dart';
 import 'package:walleta/theme/app_colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
