@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:walleta/common/ui/custom_category.dart';
+import 'package:walleta/common/ui/custom_gradient_button.dart';
 import 'package:walleta/common/ui/custom_ui_helper.dart';
 import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
+import 'package:walleta/screen/voice/components/transaction_text_field.dart';
 import 'package:walleta/theme/app_colors.dart';
 
 class TransactionConfirmationForm extends StatelessWidget {
