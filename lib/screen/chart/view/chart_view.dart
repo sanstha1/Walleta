@@ -466,10 +466,10 @@ class _TransactionPageState extends State<TransactionPage> {
       );
     }
 
-    final Map<String, List<dynamic>> grouped = {};
+    final Map<DateTime, List<dynamic>> grouped = {};
     for (final tx in transactions) {
       final date = tx.createdAt ?? DateTime.now();
-      final key = _formatDateKey(date);
+      final key = DateTime(date.year, date.month, date.day);
       grouped.putIfAbsent(key, () => []).add(tx);
     }
 
@@ -493,7 +493,7 @@ class _TransactionPageState extends State<TransactionPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                dateKey,
+                _formatDateKey(dateKey),
                 style: TextStyle(
                   fontFamily: 'monospace',
                   fontSize: 14,
@@ -539,7 +539,10 @@ class _TransactionPageState extends State<TransactionPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Dismissible(
-              key: Key(transaction.id?.toString() ?? '${dateKey}_$index'),
+              key: Key(
+                transaction.id?.toString() ??
+                    '${dateKey.toIso8601String()}_$index',
+              ),
               direction: DismissDirection.horizontal,
               confirmDismiss: (direction) async {
                 if (direction == DismissDirection.endToStart) {
@@ -557,7 +560,6 @@ class _TransactionPageState extends State<TransactionPage> {
                   if (result.success) {
                     await viewModel.getSyncedTransactions();
                   } else {
-                    // ignore: duplicate_ignore
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -595,8 +597,6 @@ class _TransactionPageState extends State<TransactionPage> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: (isIncome ? _incomeDeep : _expenseDeep)
-                            // ignore: duplicate_ignore
-                            // ignore: deprecated_member_use
                             .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),

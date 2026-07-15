@@ -11,6 +11,7 @@ import 'package:walleta/screen/voice/components/model_download_widget.dart';
 import 'package:walleta/screen/voice/components/voice_listening_indicator.dart';
 import 'package:walleta/screen/voice/viewmodel/record_voice_view_model.dart';
 import 'package:walleta/theme/app_colors.dart';
+import 'package:walleta/theme/app_theme_manager.dart';
 import 'package:stacked/stacked.dart';
 
 const Color _accentTeal = Color(0xFF006A60);
@@ -45,7 +46,8 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
+    final themeManager = context.watch<AppThemeManager>();
+    final colors = themeManager.colors;
 
     return MultiProvider(
       providers: [
@@ -83,7 +85,7 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
                 width: double.infinity,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: _buildBody(context, model),
+                  child: _buildBody(context, model, colors),
                 ),
               ),
             ),
@@ -93,26 +95,33 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
     );
   }
 
-  Widget _buildBody(BuildContext context, RecordVoiceViewModel model) {
+  Widget _buildBody(
+    BuildContext context,
+    RecordVoiceViewModel model,
+    AppColors colors,
+  ) {
     switch (model.state) {
       case VoiceState.idle:
-        return _buildIdleState(context, model);
+        return _buildIdleState(context, model, colors);
       case VoiceState.listening:
-        return _buildListeningState(context, model);
+        return _buildListeningState(context, model, colors);
       case VoiceState.processing:
-        return _buildProcessingState(context);
+        return _buildProcessingState(context, colors);
       case VoiceState.error:
-        return _buildErrorState(context, model);
+        return _buildErrorState(context, model, colors);
       case VoiceState.complete:
-        return _buildCompleteState(context, model);
+        return _buildCompleteState(context, model, colors);
     }
   }
 
-  Widget _buildCompleteState(BuildContext context, RecordVoiceViewModel model) {
-    final colors = AppColors.of(context);
+  Widget _buildCompleteState(
+    BuildContext context,
+    RecordVoiceViewModel model,
+    AppColors colors,
+  ) {
     final transaction = model.extraction;
 
-    if (transaction == null) return _buildIdleState(context, model);
+    if (transaction == null) return _buildIdleState(context, model, colors);
 
     _addViewModel.transactionTitle.text = transaction.title ?? '';
     _addViewModel.transactionAmount.text = transaction.amount?.toString() ?? '';
@@ -200,8 +209,11 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
     );
   }
 
-  Widget _buildIdleState(BuildContext context, RecordVoiceViewModel model) {
-    final colors = AppColors.of(context);
+  Widget _buildIdleState(
+    BuildContext context,
+    RecordVoiceViewModel model,
+    AppColors colors,
+  ) {
     return Column(
       key: const ValueKey('idle'),
       mainAxisAlignment: MainAxisAlignment.center,
@@ -286,8 +298,8 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
   Widget _buildListeningState(
     BuildContext context,
     RecordVoiceViewModel model,
+    AppColors colors,
   ) {
-    final colors = AppColors.of(context);
     return Column(
       key: const ValueKey('listening'),
       mainAxisAlignment: MainAxisAlignment.center,
@@ -342,8 +354,7 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
     );
   }
 
-  Widget _buildProcessingState(BuildContext context) {
-    final colors = AppColors.of(context);
+  Widget _buildProcessingState(BuildContext context, AppColors colors) {
     return Column(
       key: const ValueKey('processing'),
       mainAxisAlignment: MainAxisAlignment.center,
@@ -364,8 +375,11 @@ class _RecordVoiceViewState extends State<RecordVoiceView> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, RecordVoiceViewModel model) {
-    final colors = AppColors.of(context);
+  Widget _buildErrorState(
+    BuildContext context,
+    RecordVoiceViewModel model,
+    AppColors colors,
+  ) {
     return Column(
       key: const ValueKey('error'),
       mainAxisAlignment: MainAxisAlignment.center,
