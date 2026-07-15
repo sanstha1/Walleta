@@ -15,7 +15,19 @@ class BottomNavScreen extends StatefulWidget {
 class _BottomNavScreenState extends State<BottomNavScreen> {
   int _currentIndex = 0;
 
-  void _onVoiceTap() {}
+  List<Widget> get _screens => [
+    const HomeScreen(),
+    const TransactionPage(),
+    const RecordVoiceView(),
+    const TransactionReportView(),
+    const AccountView(),
+  ];
+
+  void _onVoiceTap() {
+    setState(() {
+      _currentIndex = 2;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +35,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     return Scaffold(
       backgroundColor: colors.backgroundColor,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          const HomeScreen(),
-          const TransactionPage(),
-          const TransactionReportView(),
-          const AccountView(),
-        ],
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       floatingActionButton: _VoiceButton(onTap: _onVoiceTap),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _BottomNav(
@@ -87,6 +91,8 @@ class _BottomNav extends StatelessWidget {
     _NavItem(icon: Icons.person_outline_rounded, label: 'Account'),
   ];
 
+  static const _indices = [0, 1, 3, 4];
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -108,13 +114,14 @@ class _BottomNav extends StatelessWidget {
 
   List<Widget> _buildItems(int start, int end) {
     return List.generate(end - start, (i) {
-      final index = start + i;
-      final item = _items[index];
-      final isSelected = currentIndex == index;
+      final itemIndex = start + i;
+      final screenIndex = _indices[itemIndex];
+      final item = _items[itemIndex];
+      final isSelected = currentIndex == screenIndex;
 
       return Expanded(
         child: GestureDetector(
-          onTap: () => onTap(index),
+          onTap: () => onTap(screenIndex),
           behavior: HitTestBehavior.opaque,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -78,9 +78,6 @@ class RuleBasedExtractionService implements TransactionExtractionService {
     'yesterday',
   ];
 
-  // FIX: digits are REQUIRED before the optional currency suffix.
-  // The second alternative uses \b so bare currency words (e.g. "dollar")
-  // never match on their own.
   static final _amountRegex = RegExp(
     r'(?:[\$₹£€¥रु])\s*(\d+[\.,]?\d*)'
     r'|(\d+[\.,]?\d+|\d+)\s*(?:dollars?|rupees?|rs\.?|npr|usd|gbp|eur|bucks?|रुपैयाँ|रु\.?)\b',
@@ -135,7 +132,7 @@ class RuleBasedExtractionService implements TransactionExtractionService {
 
     return ExtractedTransaction(
       title: title,
-      // Default to 0.0 when no numeric amount was found in the text
+
       amount: amount ?? 0.0,
       categoryTitle: categoryResult.categoryTitle,
       isIncome: isIncome,
