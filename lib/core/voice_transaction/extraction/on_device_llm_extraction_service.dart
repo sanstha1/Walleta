@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
+import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stacked/stacked_annotations.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:walleta/core/logger/logger_service.dart';
 import 'package:walleta/core/voice_transaction/extraction/transaction_extraction_service.dart';
 import 'package:walleta/core/voice_transaction/model/extracted_transaction.dart';
@@ -27,13 +29,11 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
 
   dio.CancelToken? _cancelToken;
 
-  // TODO: Replace with your CDN URL once self-hosted
   static const _modelFileName = 'gemma3-1b-it-int4.task';
   static const _tmpModelFileName = 'gemma3-1b-it-int4.task.tmp';
-  static const _driveFileId = '1fK9K5ftGx4jN3y0OT0igHYUka6ed_HKB';
+  static const _driveFileId = '1ef7Q68tiX2GN9dvJzJHfny6iMu3o-UKh';
   static const _minModelSizeBytes = 1048576; // 1 MB
 
-  // Keyword hints to map common words to categories.
   static const _categoryKeywords = <String, List<String>>{
     'Food': [
       'restaurant',
@@ -135,38 +135,36 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
       final tmpPath = await _getTmpFilePath();
       final tmpFile = File(tmpPath);
 
-      final dio = dio.Dio(
+      final dioClient = dio.Dio(
         dio.BaseOptions(followRedirects: true, maxRedirects: 10),
       );
       final downloadUrl =
           'https://drive.usercontent.google.com/download?id=$_driveFileId&export=download&confirm=t';
 
-      // Check for existing partial download to resume
       int existingBytes = 0;
       if (tmpFile.existsSync()) {
         existingBytes = tmpFile.lengthSync();
-        // Only resume if partial file is large enough to be actual data
         if (existingBytes < _minModelSizeBytes) {
           tmpFile.deleteSync();
           existingBytes = 0;
         }
       }
 
-      final Options options = Options(
+      final dio.Options options = dio.Options(
         headers: existingBytes > 0
             ? {HttpHeaders.rangeHeader: 'bytes=$existingBytes-'}
             : null,
       );
 
-      await dio.download(
+      await dioClient.download(
         downloadUrl,
         tmpPath,
         options: options,
         cancelToken: _cancelToken,
         deleteOnError: false,
         fileAccessMode: existingBytes > 0
-            ? FileAccessMode.append
-            : FileAccessMode.write,
+            ? dio.FileAccessMode.append
+            : dio.FileAccessMode.write,
         onReceiveProgress: (received, total) {
           if (total > 0) {
             final totalWithExisting = total + existingBytes;
@@ -177,7 +175,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
         },
       );
 
-      // Verify we got the actual model, not an HTML page
       if (!tmpFile.existsSync() || tmpFile.lengthSync() < _minModelSizeBytes) {
         if (tmpFile.existsSync()) tmpFile.deleteSync();
         throw Exception(
@@ -186,7 +183,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
         );
       }
 
-      // Move completed download to final path
       tmpFile.renameSync(filePath);
 
       await FlutterGemma.installModel(
@@ -223,7 +219,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     final categoryHints = _buildCategoryHints(categoryNames);
     final categoriesStr = categoryNames.join(', ');
 
-    // ── Language-aware prompt ──────────────────────────────────────────────
     final langInstruction = language == 'ne-NP'
         ? 'The text is in Nepali. Extract the transaction. '
               'Common Nepali words: खर्च=expense, तिरें/गरें=paid/spent, '
@@ -273,7 +268,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
         );
   }
 
-  // Build compact category hints for the prompt.
   static String _buildCategoryHints(List<String> categoryNames) {
     final hints = <String>[];
     for (final name in categoryNames) {
@@ -285,7 +279,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     return hints.isEmpty ? '' : 'Hints: ${hints.join(", ")}';
   }
 
-  /// Build [ExtractedTransaction] from args map.
   ExtractedTransaction _extractionFromArgs(
     Map<String, dynamic> args,
     List<String> categoryNames,
@@ -297,17 +290,14 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     var amount = _toDouble(args['amount']);
     var isIncome = _toBool(args['isIncome']);
 
-    // Only fall back to text scan if model gave null (not 0)
     amount ??= _extractAmountFromText(originalText);
 
-    // Treat 0 or negative as "not provided" → display as 0.0
     if (amount != null && amount <= 0) amount = 0.0;
 
     isIncome ??= _inferIsIncomeFromText(originalText);
 
     return ExtractedTransaction(
       title: args['title']?.toString(),
-      // Always 0.0 when nothing valid was found — never null
       amount: amount ?? 0.0,
       categoryTitle: matchedCategory,
       isIncome: isIncome,
@@ -316,14 +306,11 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     );
   }
 
-  /// Parse JSON from model text response.
-  /// Extracts the first JSON object found in the text.
   ExtractedTransaction? _tryParseJsonResponse(
     String text,
     List<String> categoryNames,
     String originalText,
   ) {
-    // Find first { ... } block in the response
     final regex = RegExp(r'\{[^{}]*\}', dotAll: true);
     final match = regex.firstMatch(text);
     if (match == null) {
@@ -340,25 +327,20 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     }
   }
 
-  /// Map the model's category output to a valid category name.
-  /// Tries: exact -> case-insensitive -> keyword lookup -> fuzzy similarity.
   String? _matchToValidCategory(
     String? modelCategory,
     List<String> validCategories,
   ) {
     if (modelCategory == null || validCategories.isEmpty) return null;
 
-    // Exact match
     if (validCategories.contains(modelCategory)) return modelCategory;
 
     final lower = modelCategory.toLowerCase();
 
-    // Case-insensitive match
     for (final valid in validCategories) {
       if (valid.toLowerCase() == lower) return valid;
     }
 
-    // Keyword-based semantic match (car -> Transport, restaurant -> Food)
     for (final valid in validCategories) {
       final keywords = _categoryKeywords[valid];
       if (keywords == null) continue;
@@ -367,7 +349,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
       }
     }
 
-    // Fuzzy string similarity
     String? bestMatch;
     double bestScore = 0.0;
     for (final valid in validCategories) {
@@ -385,9 +366,6 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
     return null;
   }
 
-  // --- Helpers to recover missing values from original text ---
-
-  // FIX: digits are REQUIRED — currency words alone never match.
   static final _numericRegex = RegExp(
     r'(?:[\$₹£€¥])\s*(\d+[\.,]?\d*)'
     r'|(\d+[\.,]?\d+|\d+)\s*(?:dollars?|rupees?|rs\.?|npr|usd|bucks?)\b',

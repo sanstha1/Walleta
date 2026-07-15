@@ -1,4 +1,5 @@
 import 'package:stacked/stacked_annotations.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:walleta/core/voice_transaction/extraction/transaction_extraction_service.dart';
 import 'package:walleta/core/voice_transaction/model/extracted_transaction.dart';
 import 'package:walleta/screen/chart/viewmodel/add_transaction_viewmodel.dart';
