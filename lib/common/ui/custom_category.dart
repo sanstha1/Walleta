@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:walleta/common/ui/custom_keyboard_hide.dart';
 import 'package:walleta/theme/app_colors.dart';
 
 class CustomCategory extends StatelessWidget {

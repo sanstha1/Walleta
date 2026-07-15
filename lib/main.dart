@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:provider/provider.dart';
 import 'package:walleta/config/api_config.dart';
 import 'package:walleta/firebase_options.dart';
@@ -29,6 +30,8 @@ Future<void> main() async {
 
   await ApiConfig.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await FlutterGemma.initialize();
 
   runApp(const WalletaApp());
 }

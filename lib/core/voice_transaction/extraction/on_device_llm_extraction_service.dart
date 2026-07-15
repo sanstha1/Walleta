@@ -31,7 +31,8 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
 
   static const _modelFileName = 'gemma3-1b-it-int4.task';
   static const _tmpModelFileName = 'gemma3-1b-it-int4.task.tmp';
-  static const _driveFileId = '1ef7Q68tiX2GN9dvJzJHfny6iMu3o-UKh';
+  static const _modelDownloadUrl =
+      'https://github.com/sanstha1/Walleta/releases/download/Gemma/gemma3-1b-it-int4.1.task';
   static const _minModelSizeBytes = 1048576; // 1 MB
 
   static const _categoryKeywords = <String, List<String>>{
@@ -138,8 +139,7 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
       final dioClient = dio.Dio(
         dio.BaseOptions(followRedirects: true, maxRedirects: 10),
       );
-      final downloadUrl =
-          'https://drive.usercontent.google.com/download?id=$_driveFileId&export=download&confirm=t';
+      final downloadUrl = _modelDownloadUrl;
 
       int existingBytes = 0;
       if (tmpFile.existsSync()) {
@@ -178,8 +178,8 @@ class OnDeviceLlmExtractionService implements TransactionExtractionService {
       if (!tmpFile.existsSync() || tmpFile.lengthSync() < _minModelSizeBytes) {
         if (tmpFile.existsSync()) tmpFile.deleteSync();
         throw Exception(
-          'Download failed: received HTML page instead of model file. '
-          'The Google Drive link may have expired or hit a quota limit.',
+          'Download failed: received an unexpected or incomplete response. '
+          'Please check your internet connection and try again.',
         );
       }
 
